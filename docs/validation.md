@@ -21,4 +21,8 @@ Verified locally on 2026-09-06, Windows 11.
 - Docker is not installed on this machine, so `compose.yaml` has not been executed locally. PostgreSQL was verified through its portable distribution instead. Windows blocked the auxiliary `createdb.exe`; a normal JDBC connection created the isolated database, without changing Windows security settings.
 - Portable tools and runtime data live in ignored `.tools/` and `.local/`. They are not published. The machine-wide Java configuration is unchanged.
 - No failure, concurrency, idempotency, authorization or query-count regression tests have been claimed. Those remain Rescue work.
-- Remote CI will be checked after publication. A local green build alone is not remote CI evidence.
+- GitHub Actions **Baseline CI** completed successfully on Linux / Java 21 for source commit `52840c947481df8e12990c7fac55ec697ee1f8cc`: [verified run](https://github.com/Cansynku/spring-backend-rescue-lab/actions/runs/34016906154). The release documentation commit only updates README/backlog/this evidence file; application source, tests and workflow are unchanged.
+
+## Release
+
+Public repository: [Cansynku/spring-backend-rescue-lab](https://github.com/Cansynku/spring-backend-rescue-lab). The annotated `baseline-v1` tag freezes the before state. Four initial commits separate scaffold, domain/provider, tests and documentation; the final documentation commit records remote CI and completion. No Rescue fixes are included.

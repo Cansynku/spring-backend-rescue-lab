@@ -8,11 +8,11 @@ Current execution scope: BRL-001 through BRL-005; functional baseline, then free
 | BRL-002 | Orders and payments, four business endpoints | Implemented |
 | BRL-003 | Simulated HTTP provider integration | Implemented |
 | BRL-004 | Baseline happy-path tests | Implemented; result in validation.md |
-| BRL-005 | PostgreSQL smoke, local Git, baseline-v1, GitHub | Validation/release in progress |
+| BRL-005 | PostgreSQL smoke, local Git, baseline-v1, GitHub | Verified and released as baseline-v1 |
 | BRL-006 | Reproduce and audit each seeded finding | Pending |
 | BRL-007 | Small independent Rescue fixes | Pending |
 | BRL-008 | Failure/concurrency tests and PostgreSQL Testcontainers | Pending |
-| BRL-009 | GitHub Actions baseline CI | Workflow prepared; remote run pending |
+| BRL-009 | GitHub Actions baseline CI | Passed on GitHub, Java 21 / Linux; see validation.md |
 | BRL-010 | Verified before/after README | Before documented; after pending |
 | BRL-011 | Reusable production readiness checklist | Pending |
 | BRL-012 | Scoped Backend Health Check offer | Pending |

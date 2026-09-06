@@ -12,6 +12,8 @@ Sprint 0 implements the functional **before** state. The Rescue and its **after*
 
 Requirements: JDK 21, Maven 3.9+, PostgreSQL 17 (Docker Compose is the standard local option).
 
+The original Windows checkout also has [portable tool and start/stop instructions](docs/windows-local.md).
+
 ```sh
 docker compose up -d --wait
 mvn clean verify
