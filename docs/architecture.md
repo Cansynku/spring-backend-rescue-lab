@@ -17,7 +17,7 @@ flowchart LR
 - `config`: intentionally permissive Spring Security policy.
 - Flyway now owns DDL through vendor-specific V1/V2 migrations; Hibernate validates schema. A separate explicit adoption guard handles the two observed unmanaged PostgreSQL schemas. See [migration procedure](schema-migrations.md).
 - Database: `purchase_orders` → one-to-many `payments`; UUID identifiers, decimal amounts and unique payment idempotency keys. PENDING intents commit before HTTP; AUTHORIZED commits with the PAID order; ambiguous failures preserve UNKNOWN or PENDING. Currency/refunds/cancellation APIs are outside scope.
-- `open-in-view=false`: response mapping happens inside service transactions. Lazy payment collection access still causes N+1 on a list.
+- `open-in-view=false`: response mapping happens inside service transactions. The order list uses a grouped left join projection with payment counts in one statement; it does not initialize payment collections. See [order evidence](order-reliability.md).
 - The local simulator lives in the same server but is called through an actual HTTP connection. Tests replace its URL with a separate HTTP fixture on a random local port.
 - Business endpoints and database bind to loopback by default. The permissive application security is still an intentional flaw; localhost containment is not a production security model.
 

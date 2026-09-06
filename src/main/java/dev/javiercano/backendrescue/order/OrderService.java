@@ -26,6 +26,6 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderResponse> list() {
-        return orders.findAll().stream().map(OrderResponse::from).toList();
+        return orders.findSummaries();
     }
 }
