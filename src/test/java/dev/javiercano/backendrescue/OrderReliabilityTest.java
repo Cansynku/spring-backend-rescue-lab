@@ -65,13 +65,27 @@ class OrderReliabilityTest {
     }
 
     @Test
-    void acceptsSmallestAndLargestRepresentablePositiveAmounts() throws Exception {
-        for (var amount : new String[]{"0.01", "999999999999999999999999999999999999.99"}) {
+    void acceptsSmallestAndLargestPayablePositiveAmounts() throws Exception {
+        for (var amount : new String[]{"0.01", "99999999999999999.99"}) {
             mvc.perform(post("/api/orders").contentType("application/json")
                             .content("{\"customerEmail\":\"demo@example.com\",\"totalAmount\":" + amount + "}"))
                     .andExpect(status().isCreated()).andExpect(jsonPath("$.paymentCount").value(0));
         }
         assertThat(orders.count()).isEqualTo(2);
+    }
+
+    @Test
+    void oversizedLegacyOrderRemainsReadableWithoutChangingItsAmount() throws Exception {
+        var amount = new BigDecimal("100000000000000000.00");
+        var legacy = orders.save(new PurchaseOrderEntity(null, amount));
+        mvc.perform(get("/api/orders/{id}", legacy.getId())).andExpect(status().isOk());
+        assertThat(service.get(legacy.getId()).totalAmount()).isEqualByComparingTo(amount);
+        assertThat(service.list()).singleElement().satisfies(order -> {
+            assertThat(order.id()).isEqualTo(legacy.getId());
+            assertThat(order.totalAmount()).isEqualByComparingTo(amount);
+            assertThat(order.customerEmail()).isNull();
+        });
+        assertThat(orders.findById(legacy.getId()).orElseThrow().getTotalAmount()).isEqualByComparingTo(amount);
     }
 
     @Test

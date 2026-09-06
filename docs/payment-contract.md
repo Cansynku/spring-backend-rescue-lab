@@ -5,7 +5,7 @@ Scope: BR-001, BR-002 and BR-003, with the payment input/error handling required
 ## Client contract (breaking relative to baseline-v1)
 
 - `POST /api/orders/{id}/payments` requires `Idempotency-Key`: 1–128 ASCII letters, digits, `.`, `_` or `-`.
-- A payment must be positive, have at most two decimal places, and equal the order total. There are no partial payments or currency conversion in this lab.
+- A payment must be positive, have at most 17 integer digits and two decimal places, and equal the order total. New orders use the same maximum, `99999999999999999.99`. Legacy orders above that amount remain readable but are unsupported by this payment API; their amounts are not rewritten. There are no partial payments or currency conversion in this lab.
 - The key identifies one order and one numeric amount. Equivalent decimal representations (25.5 and 25.50) are the same request. Reusing a key for a different request is 409.
 - A new successful payment returns 201. A completed replay returns 200 with the original payment ID. A request already in progress returns 202 with its payment ID and `PENDING` status. Clients must understand this additional enum value.
 - A provider error, timeout, invalid provider result, or failed local completion is treated conservatively as an uncertain outcome. The API returns 503 with an application error code. Retries of that key never submit another charge. Another key cannot bypass an unresolved attempt or pay an already paid order.

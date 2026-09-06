@@ -30,4 +30,4 @@ Baseline BRL-001 through BRL-005 is frozen. Current increment: order validation 
 
 ## Next milestone
 
-Next: review the stacked draft increments and scope remaining cross-API errors and operational evidence. Complete the packaged-app migration check when execution is available (see schema-migrations.md). Authentication and payment reconciliation need explicit domain contracts. No production-readiness claim before those checks are complete.
+Combined review completed at PR 3 head `e6b9987`: [findings and acceptance criteria](stack-review.md). REV-01 now aligns new order amounts with the payment limit and adds boundary/payment/legacy-read coverage. REV-02 (expected error contracts), REV-03 (framework error-detail leakage) and REV-04 (correlation and safe events) remain specified but unimplemented. Complete the packaged-app migration check when execution is available (see schema-migrations.md). Authentication and payment reconciliation need explicit domain contracts. No production-readiness claim before those checks are complete.

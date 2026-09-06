@@ -4,9 +4,9 @@ This increment builds on schema migrations at `c629238`. It changes order HTTP i
 
 ## Contract
 
-`POST /api/orders` requires a nonblank, syntactically valid email of at most 255 characters and a positive decimal amount with at most 36 integer digits and two fractional digits, matching NUMERIC(38,2). Invalid or absent fields and malformed JSON return 400 `application/problem+json` with `code: INVALID_ORDER_REQUEST`; the response does not echo rejected values. Email syntax validation does not verify mailbox ownership or delivery. No email normalization is introduced.
+`POST /api/orders` requires a nonblank, syntactically valid email of at most 255 characters and a positive decimal amount with at most 17 integer digits and two fractional digits, matching the payment API limit. The maximum is `99999999999999999.99`; database storage remains NUMERIC(38,2). Invalid or absent fields and malformed JSON return 400 `application/problem+json` with `code: INVALID_ORDER_REQUEST`; the response does not echo rejected values. Email syntax validation does not verify mailbox ownership or delivery. No email normalization is introduced.
 
-This is intentionally stricter than the previous endpoint: requests that previously stored missing/invalid values or rounded excess fractional digits now fail. Consumers relying on those inputs must change. No external consumer inventory is available. Valid requests retain 201, Location and the existing response fields. Amounts 0.01 and the maximum representable value are tested.
+This is intentionally stricter than the previous endpoint: requests that previously stored missing/invalid values, exceeded the payable limit or rounded excess fractional digits now fail. Consumers relying on those inputs must change. No external consumer inventory is available. Valid requests retain 201, Location and the existing response fields. Amounts 0.01 and the maximum payable value are tested. Legacy amounts above the payment limit remain readable and unchanged, but cannot be paid through the current API; their treatment requires an explicit domain decision, not rounding, splitting or automatic rewriting.
 
 `GET /api/orders/{id}` returns 404 with `code: ORDER_NOT_FOUND` for an absent UUID, matching the payment missing-order code. Malformed UUIDs return 400 `INVALID_ORDER_REQUEST`. These order errors use ProblemDetail; complete cross-API error normalization remains separate work.
 
@@ -25,5 +25,7 @@ After the fix, the PostgreSQL 17 clean build passes all 51 tests with no failure
 The build uses an ignored isolated checkout because the existing local demo holds its JAR open. No application restart, baseline migration or original data modification is part of this increment. The previously blocked packaged-app migration smoke remains pending in [schema-migrations.md](schema-migrations.md).
 
 ## Remaining scope
+
+REV-01 validation: the new upper-bound rejection test first failed against `e6b9987` (201 instead of 400). After aligning limits, the full PostgreSQL build passes 54 tests; H2 passes 50 with 4 intentional PostgreSQL-only skips. Added coverage checks maximum create/pay/replay with exact stored amounts, rejection of the next cent and unchanged legacy reads.
 
 Authentication/ownership and reconciliation require domain decisions. Cross-API error normalization, fuller operational logging and Testcontainers lifecycle remain pending. This is an educational demo, not a production payment service.

@@ -135,6 +135,38 @@ class PaymentReliabilityTest {
     }
 
     @Test
+    void largestPayableOrderCanBeCreatedPaidAndReplayedExactly() throws Exception {
+        var amount = "99999999999999999.99";
+        var created = mvc.perform(post("/api/orders").contentType("application/json")
+                        .content("{\"customerEmail\":\"demo@example.com\",\"totalAmount\":" + amount + "}"))
+                .andExpect(status().isCreated()).andReturn();
+        var id = body(created).get("id").asText();
+        var paid = pay(id, "maximum-amount-key", amount);
+        assertThat(paid.getResponse().getStatus()).isEqualTo(201);
+        var replay = pay(id, "maximum-amount-key", amount);
+        assertThat(replay.getResponse().getStatus()).isEqualTo(200);
+        assertThat(body(replay).get("id")).isEqualTo(body(paid).get("id"));
+        assertThat(CALLS.get()).isEqualTo(1);
+        assertThat(payments.count()).isEqualTo(1);
+        assertThat(payments.findByIdempotencyKey("maximum-amount-key").orElseThrow().getAmount())
+                .isEqualByComparingTo(amount);
+        var order = orders.findById(java.util.UUID.fromString(id)).orElseThrow();
+        assertThat(order.getTotalAmount()).isEqualByComparingTo(amount);
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PAID);
+    }
+
+    @Test
+    void nextCentAbovePayableMaximumIsRejectedBeforeOrderPersistence() throws Exception {
+        mvc.perform(post("/api/orders").contentType("application/json")
+                        .content("{\"customerEmail\":\"demo@example.com\",\"totalAmount\":100000000000000000.00}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_ORDER_REQUEST"));
+        assertThat(orders.count()).isZero();
+        assertThat(payments.count()).isZero();
+        assertThat(CALLS.get()).isZero();
+    }
+
+    @Test
     void keyCannotBeReusedForAnotherOrder() throws Exception {
         pay(order(), "shared-key", "25.50");
         var second = pay(order(), "shared-key", "25.50");
