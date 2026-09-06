@@ -1,4 +1,6 @@
-# Validation evidence
+# Baseline validation evidence
+
+This document records `baseline-v1`. Current Rescue validation is in [audit-report.md](audit-report.md).
 
 Verified locally on 2026-09-06, Windows 11.
 
