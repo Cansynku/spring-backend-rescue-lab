@@ -11,10 +11,17 @@ import org.springframework.web.client.RestClient;
 public class PaymentProviderClient {
     private final RestClient client;
 
-    public PaymentProviderClient(@Value("${payment-provider.base-url}") String baseUrl) {
-        // BR-003: no explicit connect/read timeouts; relies on system defaults.
+    public PaymentProviderClient(@Value("${payment-provider.base-url}") String baseUrl,
+            @Value("${payment-provider.connect-timeout-ms:1000}") int connectTimeoutMs,
+            @Value("${payment-provider.read-timeout-ms:2000}") int readTimeoutMs) {
+        if (connectTimeoutMs <= 0 || readTimeoutMs <= 0) {
+            throw new IllegalArgumentException("Provider timeouts must be positive");
+        }
+        var factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(connectTimeoutMs);
+        factory.setReadTimeout(readTimeoutMs);
         this.client = RestClient.builder().baseUrl(baseUrl)
-                .requestFactory(new SimpleClientHttpRequestFactory()).build();
+                .requestFactory(factory).build();
     }
 
     public ProviderChargeResponse charge(UUID orderId, BigDecimal amount) {

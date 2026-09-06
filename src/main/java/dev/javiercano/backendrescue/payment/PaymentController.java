@@ -1,7 +1,8 @@
 package dev.javiercano.backendrescue.payment;
 
 import java.util.UUID;
-import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,8 +13,9 @@ public class PaymentController {
     public PaymentController(PaymentService service) { this.service = service; }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public PaymentResponse pay(@PathVariable UUID orderId, @RequestBody CreatePaymentRequest request) {
-        return service.pay(orderId, request);
+    public ResponseEntity<PaymentResponse> pay(@PathVariable UUID orderId,
+            @RequestHeader("Idempotency-Key") String key, @Valid @RequestBody CreatePaymentRequest request) {
+        var result = service.pay(orderId, key, request);
+        return ResponseEntity.status(result.httpStatus()).body(result.payment());
     }
 }
