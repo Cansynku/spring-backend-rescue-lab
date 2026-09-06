@@ -6,7 +6,7 @@ An intentionally imperfect Java/Spring Boot Orders & Payments API. The goal is t
 
 ## Current milestone
 
-Sprint 0 is frozen as `baseline-v1`. This branch implements the first Rescue increment: durable payment attempts, idempotency, short database transactions and explicit provider timeouts. See the [before/after audit](docs/audit-report.md), [payment contract](docs/payment-contract.md) and [backlog](docs/backlog.md).
+Sprint 0 is frozen as `baseline-v1`. This branch adds versioned schema migrations to the payment reliability increment. Flyway creates/evolves tables and Hibernate validates them. See [migration paths and evidence](docs/schema-migrations.md), [payment audit](docs/audit-report.md), [payment contract](docs/payment-contract.md) and [backlog](docs/backlog.md).
 
 ## Run
 
@@ -20,7 +20,7 @@ mvn clean verify
 mvn spring-boot:run
 ```
 
-The API listens on `http://127.0.0.1:8080`; PostgreSQL is exposed only on `127.0.0.1:55432`. This branch uses a **fresh `backend_rescue_payments` database and separate Compose volume**, preserving the baseline database. The `backend_rescue` user/password are disposable local demo values, not real credentials. Do not reuse them elsewhere. An existing baseline schema is not upgraded automatically; versioned migrations remain pending.
+The API listens on `http://127.0.0.1:8080`; PostgreSQL is exposed only on `127.0.0.1:55432`. A fresh `backend_rescue_payments` database migrates automatically. An existing unmanaged baseline/payment database requires explicit [verified schema adoption](docs/schema-migrations.md); normal startup refuses to guess its version. The `backend_rescue` user/password are disposable local demo values, not real credentials. Do not reuse them elsewhere.
 
 PowerShell end-to-end check, in another terminal:
 
@@ -63,12 +63,12 @@ An uncertain provider outcome returns 503 and requires reconciliation; the same 
 
 Controllers → payment coordinator → short transactions / HTTP provider / short transactions. [Architecture](docs/architecture.md) explains the boundaries.
 
-The baseline's ten intentional findings remain recorded in [findings](docs/findings.md). Payment replay/concurrency and provider failure cases now have regression tests. Order input validation, N+1, cross-API error consistency, authentication, schema migrations and complete operational logging remain pending. No production-readiness claim is made.
+The baseline's ten intentional findings remain recorded in [findings](docs/findings.md). Payment replay/concurrency, provider failures and schema migrations now have regression tests. Order input validation, N+1, cross-API error consistency, authentication, reconciliation and complete operational logging remain pending. No production-readiness claim is made.
 
-Run `mvn clean verify` for the H2 suite. For PostgreSQL, create a disposable `backend_rescue_test` database in the local cluster and run `scripts/verify-postgres.ps1`. That command recreates test tables: never target application data. CI runs both H2 and PostgreSQL 17. Tests include HTTP failures/timeouts, concurrent requests, persisted uncertainty and transactional rollback. Testcontainers lifecycle management remains future work; PostgreSQL CI currently uses a GitHub Actions service.
+Run `mvn clean verify` for H2. For PostgreSQL, create a disposable `backend_rescue_test` database and run `scripts/verify-postgres.ps1`. Tests migrate that database and clear test fixtures; never target application data. Migration tests additionally create/drop their own isolated schemas. CI runs H2 and PostgreSQL 17. Testcontainers lifecycle management remains future work; PostgreSQL CI uses a GitHub Actions service.
 
 ## Workflow
 
-`baseline` and `baseline-v1` preserve the verified before state. `rescue/payment-reliability` contains this increment. The initial reproduction commit has six deliberately failing tests against baseline code; the following implementation makes them pass and extends regression coverage. Do not rewrite the baseline tag.
+`baseline` and `baseline-v1` preserve the before state. `rescue/payment-reliability` is PR #1; `rescue/schema-migrations` builds on it as a separate review. The initial payment reproduction commit has six deliberately failing tests against baseline code; the following implementation makes them pass. Do not rewrite the baseline tag.
 
 Source code is original demo work. No employer code, documents, infrastructure or real customer data are used.

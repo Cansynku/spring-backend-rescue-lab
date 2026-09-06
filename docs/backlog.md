@@ -1,6 +1,6 @@
 # Sprint 0 and Rescue backlog
 
-Baseline BRL-001 through BRL-005 is frozen. Current increment: reproduce and correct BR-001 through BR-003, plus supporting payment validation/errors; preserve the other findings for subsequent increments. The broader business plan is context, not proof of revenue or market validation.
+Baseline BRL-001 through BRL-005 is frozen. Current increment: BR-009 versioned migrations, based on the payment reliability branch; no parent PR merge. The broader business plan is context, not proof of revenue or market validation.
 
 | Ticket | Deliverable | Status |
 | --- | --- | --- |
@@ -10,7 +10,7 @@ Baseline BRL-001 through BRL-005 is frozen. Current increment: reproduce and cor
 | BRL-004 | Baseline happy-path tests | Implemented; result in validation.md |
 | BRL-005 | PostgreSQL smoke, local Git, baseline-v1, GitHub | Verified and released as baseline-v1 |
 | BRL-006 | Reproduce and audit each seeded finding | Payment increment reproduced; other findings pending |
-| BRL-007 | Small independent Rescue fixes | Payment reliability increment implemented; others pending |
+| BRL-007 | Small independent Rescue fixes | Payment reliability and versioned migrations implemented; remaining findings pending |
 | BRL-008 | Failure/concurrency tests and PostgreSQL Testcontainers | Failure/concurrency tests run on H2 and real PostgreSQL; Testcontainers lifecycle pending |
 | BRL-009 | GitHub Actions CI | H2 and PostgreSQL workflow prepared for this branch; baseline CI evidence retained |
 | BRL-010 | Verified before/after README | Payment before/after documented; complete Rescue pending |
@@ -30,4 +30,4 @@ Baseline BRL-001 through BRL-005 is frozen. Current increment: reproduce and cor
 
 ## Next milestone
 
-Next increment: reproduce order validation/error and N+1 cases, then introduce versioned schema migrations before upgrading baseline databases. Authentication and payment reconciliation need explicit domain contracts. No production-readiness claim before those checks are complete.
+Next increment: reproduce order validation/error and N+1 cases. Complete the packaged-app migration check when execution is available (see schema-migrations.md). Authentication and payment reconciliation need explicit domain contracts. No production-readiness claim before those checks are complete.

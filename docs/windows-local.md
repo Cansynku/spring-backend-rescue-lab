@@ -2,7 +2,7 @@
 
 This checkout has a project-local JDK 21 and PostgreSQL under ignored `.tools/`, with database data under ignored `.local/`. These binaries are not part of the Git repository. A fresh clone should use the standard README prerequisites.
 
-The payment branch uses `backend_rescue_payments`; `backend_rescue_test` is a separate disposable test database. Both were created in the local cluster, leaving the baseline `backend_rescue` database intact. Do not use the baseline schema with this branch before a migration is implemented.
+The payment branch uses `backend_rescue_payments`; `backend_rescue_test` is a separate disposable test database. On the migration branch, existing unmanaged databases need [explicit adoption](schema-migrations.md). The original baseline database is intact. The running demo still uses the previous payment build; its data has not been adopted automatically.
 
 From a PowerShell terminal opened in this directory, select the portable JDK for **that terminal only**:
 
