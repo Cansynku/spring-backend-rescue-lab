@@ -17,6 +17,7 @@ public class OrderErrorHandler {
         var problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
                 "A valid order identifier, email and positive amount with at most two decimal places are required.");
         problem.setProperty("code", "INVALID_ORDER_REQUEST");
+        problem.setInstance(java.net.URI.create("urn:backend-rescue:invalid-order-request"));
         return problem;
     }
 

@@ -22,6 +22,11 @@ public class PaymentTransactions {
 
     public record Reservation(PaymentResponse payment, boolean created) {}
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public boolean hasIdempotencyKey(String key) {
+        return payments.findByIdempotencyKey(key).isPresent();
+    }
+
     public Reservation reserve(UUID orderId, String key, BigDecimal amount) {
         var order = orders.findLockedById(orderId).orElseThrow(() ->
                 new PaymentException(HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND", "Order not found."));

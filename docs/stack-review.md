@@ -59,8 +59,18 @@ For expected errors, preserve existing `ORDER_NOT_FOUND`, `INVALID_ORDER_REQUEST
 - Authentication/ownership, provider reconciliation and crash recovery still require domain decisions and separate work. Do not expose this simulator as a production service.
 - Resolve and review changes before considering integration. The dependency order is PR 1, then PR 2, then PR 3; confirm each base/diff after parent integration. Do not merge a child into an obsolete parent branch as a substitute for integration into the intended delivery branch. No merge authorization is implied by this report.
 
-The review itself did not change application source. Its subsequent REV-01 correction is described below; R2/R3 and REV-04 remain pending.
+The review itself did not change application source. Subsequent REV-01/REV-02 corrections are described below; R2 (REV-03) and REV-04 remain pending.
 
 ## REV-01 follow-up
 
 Order creation now uses the existing payment limit of 17 integer digits and two fractional digits. No schema or payment limit changed. The boundary regression first failed against `e6b9987` (expected 400, observed 201). Added coverage creates and pays the maximum, replays it with one provider call, verifies exact persisted amounts, rejects the next cent before persistence/provider access, and reads an oversized nullable legacy order without rewriting it. The former 36-digit acceptance test now uses the payable maximum. See the current PR checks for final validation. REV-02, REV-03 and REV-04 are not implemented by this correction.
+
+## REV-02 follow-up
+
+Malformed payment UUIDs now receive 400 `INVALID_PAYMENT_REQUEST` ProblemDetail. Invalid order/payment requests use a fixed URN instance, avoiding Spring's automatic reflection of a malformed path. Existing 400/404/409 codes are retained. Tests check content type, status/code and absence of synthetic private input/SQL detail in complete response bodies.
+
+Reservation failures no longer all claim a key conflict. SQLSTATE 23505 plus a matching persisted key, read after rollback in a new transaction, establishes the collision without relying on legacy constraint names. Other integrity failures return a safe 500 `PAYMENT_PERSISTENCE_FAILED`; data-access failures during reservation or key verification return 503 `PAYMENT_STORAGE_UNAVAILABLE`. The provider is not called on those paths. A safe category event records the storage failure without its raw message. This does not solve the separate Hibernate log detail issue (REV-03).
+
+Tests cover malformed UUID/JSON, missing orders, changed requests, injected not-null/foreign-key/other-unique failures, unavailable reservation storage and failed key verification. Existing H2/PostgreSQL concurrency tests continue to protect real unique-key races and single provider submission. Injection establishes the error translation behavior, not a real database-outage experiment. Framework 405/415/unknown-route handling and non-data-access infrastructure exceptions are outside this increment's expected-error contract.
+
+Final local clean builds: PostgreSQL 61 tests passed, no skips; H2 57 passed with 4 intentional PostgreSQL-only skips. The PostgreSQL run also recorded an actual SQLSTATE 23505 collision in the concurrency test. The remaining raw framework detail in that log is still REV-03's reproduced problem, not resolved by safe HTTP error messages.

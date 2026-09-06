@@ -10,6 +10,8 @@ Scope: BR-001, BR-002 and BR-003, with the payment input/error handling required
 - A new successful payment returns 201. A completed replay returns 200 with the original payment ID. A request already in progress returns 202 with its payment ID and `PENDING` status. Clients must understand this additional enum value.
 - A provider error, timeout, invalid provider result, or failed local completion is treated conservatively as an uncertain outcome. The API returns 503 with an application error code. Retries of that key never submit another charge. Another key cannot bypass an unresolved attempt or pay an already paid order.
 - Missing order: 404. Missing key or invalid amount/key: 400. An order that is not payable or a changed request: 409.
+- Malformed payment UUIDs and JSON return 400 ProblemDetail with `INVALID_PAYMENT_REQUEST`. Invalid order requests use `INVALID_ORDER_REQUEST`. Their `instance` is a fixed endpoint-family URN so malformed path input is not echoed; it is not a request correlation ID.
+- A reservation uniqueness exception is classified as `IDEMPOTENCY_CONFLICT` only when SQLSTATE 23505 is accompanied by a persisted matching key, checked in a fresh transaction after rollback. This avoids dependence on generated legacy constraint names. Other reservation integrity failures return 500 `PAYMENT_PERSISTENCE_FAILED`. A reservation/key-lookup data-access failure returns 503 `PAYMENT_STORAGE_UNAVAILABLE`. Neither exposes SQL details or calls the provider; use the original key when checking outcomes. Failures after provider submission still follow the existing uncertain-outcome policy.
 
 Known consumers: the repository's happy-path test and PowerShell smoke script; both will be updated. No external consumer deployment is known or asserted.
 

@@ -92,8 +92,10 @@ class OrderReliabilityTest {
     void missingAndMalformedIdsHaveStableErrors() throws Exception {
         mvc.perform(get("/api/orders/{id}", UUID.randomUUID())).andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("ORDER_NOT_FOUND"));
-        mvc.perform(get("/api/orders/not-a-uuid")).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_ORDER_REQUEST"));
+        var invalid = mvc.perform(get("/api/orders/not-a-uuid")).andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+                .andExpect(jsonPath("$.code").value("INVALID_ORDER_REQUEST")).andReturn();
+        assertThat(invalid.getResponse().getContentAsString()).doesNotContain("not-a-uuid");
     }
 
     @Test
