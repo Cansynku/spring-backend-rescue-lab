@@ -13,6 +13,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 public class PaymentErrorHandler {
     @ExceptionHandler(PaymentException.class)
     ProblemDetail paymentError(PaymentException error) {
+        org.slf4j.LoggerFactory.getLogger(PaymentErrorHandler.class)
+                .info("payment_request_rejected code={} status={}", error.code(), error.status().value());
         var problem = ProblemDetail.forStatusAndDetail(error.status(), error.getMessage());
         problem.setProperty("code", error.code());
         return problem;

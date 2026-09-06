@@ -15,6 +15,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -39,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@ExtendWith(OutputCaptureExtension.class)
 class PaymentReliabilityTest {
     private static final AtomicInteger CALLS = new AtomicInteger();
     private static final AtomicInteger RESPONSE_STATUS = new AtomicInteger(200);
@@ -244,7 +248,7 @@ class PaymentReliabilityTest {
     }
 
     @Test
-    void simultaneousDifferentOrdersCannotClaimTheSameKey() throws Exception {
+    void simultaneousDifferentOrdersCannotClaimTheSameKey(CapturedOutput output) throws Exception {
         var firstOrder = order();
         var secondOrder = order();
         var start = new CountDownLatch(1);
@@ -257,6 +261,8 @@ class PaymentReliabilityTest {
         }
         assertThat(CALLS.get()).isEqualTo(1);
         assertThat(payments.count()).isEqualTo(1);
+        assertThat(output.getAll()).contains("payment_request_rejected code=IDEMPOTENCY_CONFLICT")
+                .doesNotContain("race-key");
     }
 
     @Test
@@ -410,6 +416,31 @@ class PaymentReliabilityTest {
         assertThat(body(result).get("status").asInt()).isEqualTo(status);
         assertThat(body(result).get("code").asText()).isEqualTo(code);
         assertThat(result.getResponse().getContentAsString()).doesNotContain("private-", "23505", "SQLException");
+    }
+
+    @Test
+    void frameworkAndProviderFailureLogsExcludeSensitiveValues(CapturedOutput output) throws Exception {
+        var key = "sensitive-key-marker";
+        var created = mvc.perform(post("/api/orders").contentType("application/json")
+                        .content("{\"customerEmail\":\"sensitive-email@example.com\",\"totalAmount\":25.50}"))
+                .andExpect(status().isCreated()).andReturn();
+        var id = body(created).get("id").asText();
+        RESPONSE_STATUS.set(503);
+        RESPONSE_BODY.set("sensitive-provider-body-marker");
+        var failed = pay(id, key, "25.50");
+        assertThat(failed.getResponse().getStatus()).isEqualTo(503);
+        var requestId = failed.getResponse().getHeader("X-Request-ID");
+        assertThat(requestId).isNotBlank();
+        // Force an actual database unique violation, independent of race scheduling.
+        var another = orders.save(new dev.javiercano.backendrescue.order.PurchaseOrderEntity(
+                "sensitive-email@example.com", new java.math.BigDecimal("25.50")));
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> payments.saveAndFlush(
+                new dev.javiercano.backendrescue.payment.PaymentEntity(another, new java.math.BigDecimal("25.50"), key)))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        assertThat(output.getAll()).contains("database_operation_failed diagnostic=redacted", "payment_outcome_unknown",
+                "requestId=" + requestId).doesNotContain(key, "sensitive-email@example.com", "sensitive-provider-body-marker");
+        assertThat(org.slf4j.MDC.get("requestId")).isNull();
+        assertThat(CALLS.get()).isEqualTo(1);
     }
 
     @ParameterizedTest
