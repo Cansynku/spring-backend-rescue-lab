@@ -6,6 +6,8 @@ An intentionally imperfect Java/Spring Boot Orders & Payments API. The goal is t
 
 ## Current milestone
 
+**Interactive local demo:** [Abrir la pantalla de pedidos y pagos](docs/demo-screen.md). The `rescue/demo-interface` branch serves a Spanish screen directly from Spring Boot and includes HTTP and JavaScript flow tests. Persistent local startup still requires the user action described there.
+
 **Presentation:** [Resultados para enseñar — before/after portfolio case](docs/project-progress.md). Latest increment: [safe diagnostics and request correlation](docs/observability.md), on `rescue/safe-observability` above PR #3.
 
 Sprint 0 is frozen as `baseline-v1`. This branch adds order validation and a single-query order list on top of payment reliability and versioned migrations. See [order contract and evidence](docs/order-reliability.md), [migration paths](docs/schema-migrations.md), [payment audit](docs/audit-report.md), [payment contract](docs/payment-contract.md) and [backlog](docs/backlog.md).

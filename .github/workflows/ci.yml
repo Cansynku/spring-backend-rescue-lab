@@ -17,6 +17,11 @@ jobs:
           cache: maven
       - name: Verify H2 regression suite
         run: mvn --batch-mode --no-transfer-progress clean verify
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify demo browser logic without external dependencies
+        run: node --test scripts/test-demo-ui.cjs
   verify-postgres:
     runs-on: ubuntu-latest
     timeout-minutes: 15

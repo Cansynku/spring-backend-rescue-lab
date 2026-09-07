@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Backend Rescue · Pedidos</title>
+  <meta name="description" content="Crea pedidos y prueba pagos simulados en el laboratorio Backend Rescue.">
+  <link rel="stylesheet" href="/demo.css"><script src="/demo.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/">BR<span>Backend Rescue</span></a><span class="demo-label">Laboratorio · Sin dinero real</span></header>
+  <main>
+    <div class="heading"><div><p class="eyebrow">TU ESPACIO DE PRUEBAS</p><h1>Pedidos y pagos</h1><p>Crea un pedido, simula su pago y comprueba el resultado.</p></div><span id="connection" class="connection">Conectando…</span></div>
+    <section class="stats" aria-label="Resumen de pedidos"><div><span>Pedidos</span><strong id="total">—</strong></div><div><span>Pagados</span><strong id="paid">—</strong></div><div><span>Sin pagar</span><strong id="unpaid">—</strong></div></section>
+    <div class="workspace">
+      <section class="panel create"><span class="step">01 / CREAR</span><h2>Nuevo pedido</h2><p>Utiliza un correo de prueba.</p>
+        <form id="create-form">
+          <label for="email">Correo</label><input id="email" type="email" value="demo@example.com" maxlength="255" autocomplete="off" required>
+          <label for="amount">Importe</label><input id="amount" type="text" inputmode="decimal" value="25,50" aria-describedby="amount-help" required>
+          <small id="amount-help">De 0,01 a 999.999,99 · hasta dos decimales.</small>
+          <button id="create" type="submit">Crear pedido <span aria-hidden="true">↗</span></button>
+        </form>
+        <div class="tip"><strong>Prueba sin riesgo</strong><p>Los pagos usan un simulador. Repetir un pago con la misma referencia no crea otro cobro.</p></div>
+      </section>
+      <section class="panel orders"><div class="section-heading"><div><span class="step">02 / PROBAR</span><h2>Tus pedidos</h2></div><button id="refresh" class="secondary" type="button">Actualizar</button></div>
+        <p class="list-help">Simula un pago o repite una petición para comprobar que no se duplica.</p>
+        <div id="orders" aria-live="polite"><p class="empty">Cargando pedidos…</p></div>
+      </section>
+    </div>
+    <section id="result" class="result" role="status" aria-live="polite" hidden><strong id="result-title"></strong><p id="result-message"></p><small id="request-reference"></small></section>
+    <footer>Datos locales de demostración. Los pedidos se conservan al cerrar esta pantalla.</footer>
+  </main>
+</body>
+</html>

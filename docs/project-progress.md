@@ -20,6 +20,8 @@ No es un encargo de un cliente ni mueve dinero real. La baseline permanece conge
 
 ## Recorrido de demostración
 
+La nueva [pantalla de pedidos y pagos](demo-screen.md) permite seguir el recorrido con botones. Su flujo está probado por HTTP; falta abrir la instancia persistente mediante el lanzador local, porque el arranque automático fue rechazado. No confundirlo con la demo antigua que ya estaba abierta.
+
 **Validación de este incremento:** 64 pruebas aprobadas en PostgreSQL. H2 descubre 64, con 60 aplicables y 4 casos de migración exclusivos de PostgreSQL. Los checks de la PR permiten comprobar el resultado sobre el commit publicado. No se adjuntan logs brutos con datos de las pruebas.
 
 1. Mostrar [la baseline](https://github.com/Cansynku/spring-backend-rescue-lab/tree/baseline) y el inventario de diez problemas deliberados.
