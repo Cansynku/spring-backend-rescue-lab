@@ -4,6 +4,16 @@ La app ya incluye una pantalla en español para crear pedidos, simular pagos y c
 
 ## Abrirla en este equipo
 
+**Actualización 07/09:** Windows bloquea el PostgreSQL portable (eventos Code Integrity 3077/3033 para `postgres.exe` y bloqueo explícito de `pg_ctl.exe`). El doble clic del usuario sí lanzó Java; falló la conexión JDBC con `Connection reset`. No es un error de copiar comandos ni de migraciones. No se ha cambiado la política de Windows.
+
+Para probar la pantalla sin ese proceso bloqueado, utiliza **`scripts/abrir-demo-autonoma.cmd`**. El paquete `standalone-demo` incluye H2 y guarda sus datos en `.local/standalone-demo/orders` dentro del proyecto. Se abre igualmente en http://127.0.0.1:8083/. Es una base separada: no importa ni modifica datos de PostgreSQL. La configuración normal de la API continúa usando PostgreSQL. Solo puede abrirse una instancia de esta demo a la vez.
+
+No pegues el contenido del archivo en CMD. Puedes ejecutarlo con doble clic o pegar únicamente su ruta completa entre comillas. Espera el mensaje `Started BackendRescueApplication` antes de abrir la página. La ejecución persistente del nuevo lanzador todavía debe confirmarse; el paquete y las pruebas se han verificado.
+
+Para reconstruir el paquete autónomo en este equipo: `mvn -f .local/standalone-build/pom.xml -Pstandalone-demo clean verify` después de sincronizar allí el código. Desde un clon normal: `mvn -Pstandalone-demo clean verify` genera el paquete en `target/`; ejecútalo con `--spring.profiles.active=standalone-demo`. La prueba `StandaloneStorageTest` verifica migraciones y conservación del pedido tras cerrar y volver a abrir la base de archivo.
+
+### Arranque original con PostgreSQL (bloqueado actualmente en este equipo)
+
 1. Ejecuta `scripts/abrir-demo.cmd` con doble clic y deja la ventana abierta.
 2. Cuando termine de arrancar, abre [la demo local](http://127.0.0.1:8083/).
 3. Usa el correo de prueba y el importe propuestos. Pulsa **Crear pedido**, después **Simular pago** y finalmente **Repetir sin duplicar**. El pedido debe seguir mostrando un solo intento de pago.
