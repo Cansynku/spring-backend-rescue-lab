@@ -20,9 +20,9 @@ No es un encargo de un cliente ni mueve dinero real. La baseline permanece conge
 
 ## Recorrido de demostración
 
-La nueva [pantalla de pedidos y pagos](demo-screen.md) permite seguir el recorrido con botones. Su flujo está probado por HTTP; falta abrir la instancia persistente mediante el lanzador local, porque el arranque automático fue rechazado. No confundirlo con la demo antigua que ya estaba abierta.
+La nueva [pantalla de pedidos y pagos](demo-screen.md) permite seguir el recorrido con botones. La demo autonoma responde en 8083. La variante PostgreSQL en 8084 fue abierta por el usuario el 07/09/2026: GET / 200 y smoke PASS (201/201/200, PAID, un pago). La suite PostgreSQL previa registró 66 tests sin fallos, errores ni omisiones; no se repitió para este cierre documental. Ver [recuperacion y bases separadas](local-postgres-recovery.md).
 
-**Validación de este incremento:** 64 pruebas aprobadas en PostgreSQL. H2 descubre 64, con 60 aplicables y 4 casos de migración exclusivos de PostgreSQL. Los checks de la PR permiten comprobar el resultado sobre el commit publicado. No se adjuntan logs brutos con datos de las pruebas.
+**Validación histórica del incremento de observabilidad:** 64 pruebas aprobadas en PostgreSQL. H2 descubre 64, con 60 aplicables y 4 casos de migración exclusivos de PostgreSQL. Los checks de la PR permiten comprobar el resultado sobre el commit publicado. No se adjuntan logs brutos con datos de las pruebas.
 
 1. Mostrar [la baseline](https://github.com/Cansynku/spring-backend-rescue-lab/tree/baseline) y el inventario de diez problemas deliberados.
 2. Abrir [la PR de pagos](https://github.com/Cansynku/spring-backend-rescue-lab/pull/1): comparar el intento persistido y la llamada fuera de transacción.
@@ -30,13 +30,13 @@ La nueva [pantalla de pedidos y pagos](demo-screen.md) permite seguir el recorri
 4. Abrir [la PR de pedidos y errores](https://github.com/Cansynku/spring-backend-rescue-lab/pull/3): enseñar el límite compartido y la consulta con recuentos.
 5. Mostrar los checks de la rama `rescue/safe-observability` y [la política de logs](observability.md). Explicar qué datos se permiten y cómo se verifica que los marcadores no aparecen.
 
-El recorrido es reproducible con las pruebas del repositorio. La demo local que ya estaba arrancada utiliza un build anterior: no se presenta como prueba de estas últimas mejoras. El arranque de la aplicación empaquetada sobre una copia de la baseline sigue pendiente porque el control automático rechazó aquella acción; no se ha intentado eludirlo.
+El recorrido es reproducible con las pruebas del repositorio. La referencia a una demo antigua corresponde al paso anterior; la demo PostgreSQL de 8084 ya tiene el smoke confirmado descrito arriba. El arranque de la aplicación empaquetada sobre una copia de la baseline sigue pendiente porque el control automático rechazó aquella acción; no se ha intentado eludirlo.
 
 ## Qué podemos afirmar y qué no
 
 Podemos enseñar código propio, fallos reproducidos, cambios revisables y pruebas contra H2/PostgreSQL. Una consulta no equivale a una mejora de latencia medida: todavía no hay benchmark. Tampoco hay pagos reales, clientes conseguidos ni ingresos demostrados.
 
-Antes de una entrega final faltan la revisión conjunta de las correcciones, el smoke empaquetado pendiente y la decisión explícita de integración. Autenticación, propiedad de los pedidos y reconciliación necesitan contratos propios. La aplicación continúa siendo un laboratorio local, no un servicio listo para producción.
+La demo local tiene el recorrido en navegador verificado y un [guion de presentación](demo-presentation.md). Para aceptar e integrar la pila completa sigue pendiente su revisión conjunta final y una autorización explícita de integración. El arranque empaquetado sobre una copia de la baseline sigue sin verificarse: es una comprobación de migración distinta del smoke de la demo, y no bloquea presentar pedidos y pagos con ese límite declarado. Autenticación, propiedad de los pedidos y reconciliación necesitan contratos propios. La aplicación continúa siendo un laboratorio local, no un servicio listo para producción.
 
 ## Uso profesional
 

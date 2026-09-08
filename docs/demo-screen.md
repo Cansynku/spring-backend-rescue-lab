@@ -4,15 +4,21 @@ La app ya incluye una pantalla en español para crear pedidos, simular pagos y c
 
 ## Abrirla en este equipo
 
+**PostgreSQL recuperado en una instancia nueva:** usa `scripts/abrir-demo-postgresql.cmd`
+y abre http://127.0.0.1:8084/ cuando arranque. El usuario ya abrió esta variante el
+07/09/2026: GET / 200 y smoke PASS (201/201/200, PAID, un pago). La suite previa
+registró 66 tests sin fallos, errores ni omisiones. No se han repetido en este cierre documental. [Detalle y separacion de datos](local-postgres-recovery.md).
+La demo autonoma de 8083 ya responde HTTP 200 y puede seguir utilizandose.
+
 **Actualización 07/09:** Windows bloquea el PostgreSQL portable (eventos Code Integrity 3077/3033 para `postgres.exe` y bloqueo explícito de `pg_ctl.exe`). El doble clic del usuario sí lanzó Java; falló la conexión JDBC con `Connection reset`. No es un error de copiar comandos ni de migraciones. No se ha cambiado la política de Windows.
 
 Para probar la pantalla sin ese proceso bloqueado, utiliza **`scripts/abrir-demo-autonoma.cmd`**. El paquete `standalone-demo` incluye H2 y guarda sus datos en `.local/standalone-demo/orders` dentro del proyecto. Se abre igualmente en http://127.0.0.1:8083/. Es una base separada: no importa ni modifica datos de PostgreSQL. La configuración normal de la API continúa usando PostgreSQL. Solo puede abrirse una instancia de esta demo a la vez.
 
-No pegues el contenido del archivo en CMD. Puedes ejecutarlo con doble clic o pegar únicamente su ruta completa entre comillas. Espera el mensaje `Started BackendRescueApplication` antes de abrir la página. La ejecución persistente del nuevo lanzador todavía debe confirmarse; el paquete y las pruebas se han verificado.
+No pegues el contenido del archivo en CMD. Puedes ejecutarlo con doble clic o pegar únicamente su ruta completa entre comillas. Espera el mensaje `Started BackendRescueApplication` antes de abrir la página. La apertura de PostgreSQL en 8084 ya se confirmó el 07/09/2026; si sigue abierta, no lances otra instancia. H2 en 8083 conserva datos separados.
 
 Para reconstruir el paquete autónomo en este equipo: `mvn -f .local/standalone-build/pom.xml -Pstandalone-demo clean verify` después de sincronizar allí el código. Desde un clon normal: `mvn -Pstandalone-demo clean verify` genera el paquete en `target/`; ejecútalo con `--spring.profiles.active=standalone-demo`. La prueba `StandaloneStorageTest` verifica migraciones y conservación del pedido tras cerrar y volver a abrir la base de archivo.
 
-### Arranque original con PostgreSQL (bloqueado actualmente en este equipo)
+### Referencia histórica: arranque original bloqueado (no ejecutar en este equipo)
 
 1. Ejecuta `scripts/abrir-demo.cmd` con doble clic y deja la ventana abierta.
 2. Cuando termine de arrancar, abre [la demo local](http://127.0.0.1:8083/).
@@ -24,7 +30,7 @@ El paquete compilado está en `.local/ui-validation/target/` en este equipo. El 
 
 ## Qué verás
 
-- Un formulario con correo e importe y un listado de pedidos conservados en PostgreSQL.
+- Un formulario con correo e importe y un listado de pedidos conservados en la base elegida: PostgreSQL o H2 en la demo autonoma.
 - Estado de conexión, recuentos y estado de cada pedido.
 - Confirmación de pago, repetición sin duplicados y mensajes de resultado pendiente.
 - Una referencia de operación para localizar sus eventos cuando la API la proporciona.
@@ -37,6 +43,6 @@ Las claves de pago se conservan en el almacenamiento local de este navegador, po
 
 `DemoHttpTest` arranca una instancia de prueba en un puerto aleatorio: comprueba la pantalla y sus recursos y recorre creación, pago, repetición y lectura usando HTTP real con un proveedor simulado. Esa prueba sí ha arrancado y probado la aplicación; no equivale al arranque persistente del lanzador sobre `backend_rescue_ui`.
 
-`node --test scripts/test-demo-ui.cjs` prueba la lógica JavaScript con una superficie DOM simulada: reutilización de clave tras perder una respuesta y recargar, bloqueo preventivo cuando el almacenamiento falla, y validación/conversión del importe. No se ha realizado inspección visual ni interacción automatizada en un navegador real.
+`node --test scripts/test-demo-ui.cjs` prueba la lógica JavaScript con una superficie DOM simulada: reutilización de clave tras perder una respuesta y recargar, bloqueo preventivo cuando el almacenamiento falla, y validación/conversión del importe. El 07/09/2026 se comprobó además el navegador integrado sobre 8084: crear un pedido sintético de 25,50, simular el pago y repetir. El pedido d94f825a pasó de cero a un intento y permaneció en uno, con el mensaje «Mismo pago, sin duplicados». La captura revisada muestra formulario y listado legibles; no es una revisión multidispositivo ni de accesibilidad completa.
 
-La aplicación sigue siendo una demo local, sin autenticación ni dinero real. No se ha desplegado públicamente. Para cerrar la entrega visible falta que el usuario abra el lanzador y confirme que puede ver y utilizar la pantalla.
+La aplicación sigue siendo una demo local, sin autenticación ni dinero real. No se ha desplegado públicamente. La apertura de la variante PostgreSQL en 8084 y su smoke HTTP se confirmaron el 07/09/2026. El recorrido visual local está verificado; véase el [guion y cierre de demo](demo-presentation.md).

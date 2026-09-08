@@ -56,4 +56,4 @@ There is no destructive down migration. Rollback means restoring a verified back
 
 ## Remaining work
 
-Complete the blocked packaged-app check on a baseline copy when normal execution is available. N+1, order validation, consistent cross-API errors, authentication/ownership and reconciliation remain separate increments. The adoption paths are validated for the two observed PostgreSQL 17 schemas, not arbitrary customer databases.
+Complete the blocked packaged-app check on a baseline copy when normal execution is available. Subsequent increments address N+1, order validation and scoped error consistency (see order-reliability.md and observability.md). Authentication/ownership and reconciliation remain outside this demo closure. The adoption paths are validated for the two observed PostgreSQL 17 schemas, not arbitrary customer databases.

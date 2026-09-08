@@ -1,5 +1,10 @@
 # This Windows workspace
 
+**07/09/2026 update:** the portable Windows PostgreSQL below is blocked by Code
+Integrity. Use the [verified WSL PostgreSQL replacement](local-postgres-recovery.md)
+on port 55433. The instructions below describe the previous setup, not the
+current recovery procedure. Its old data remains preserved separately.
+
 This checkout has a project-local JDK 21 and PostgreSQL under ignored `.tools/`, with database data under ignored `.local/`. These binaries are not part of the Git repository. A fresh clone should use the standard README prerequisites.
 
 The payment branch uses `backend_rescue_payments`; `backend_rescue_test` is a separate disposable test database. On the migration branch, existing unmanaged databases need [explicit adoption](schema-migrations.md). The original baseline database is intact. The running demo still uses the previous payment build; its data has not been adopted automatically.
