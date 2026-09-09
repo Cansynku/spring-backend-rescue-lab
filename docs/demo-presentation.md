@@ -1,8 +1,8 @@
 # Demo Backend Rescue — guion de cinco minutos
 
 Estado local al 07/09/2026: preparada para presentar pedidos y pagos simulados.
-Referencia: rescue/demo-interface, HEAD 53c5d10 más cambios locales sin commit.
-No equivale a aceptación de la pila de PRs ni a preparación para producción.
+Referencia de la prueba visual: rescue/demo-interface, HEAD 53c5d10 más los cambios locales de aquel paso. El cierre documental se publicó en 7012519 y las PRs #1–#5 se integraron en main el 09/09/2026.
+La integración fue autorizada por el propietario y no equivale a preparación para producción ni a review independiente.
 
 ## Recorrido
 
@@ -28,7 +28,7 @@ No equivale a aceptación de la pila de PRs ni a preparación para producción.
 
 Para esta presentación local no se ha observado un bloqueo en el recorrido comprobado. Antes de otra sesión, comprobar que 8084 sigue disponible; no lanzar otra instancia si ya está abierta.
 
-Para aceptar/integrar el desarrollo: revisión final conjunta de la pila completa y decisión del propietario; esta revisión local no sustituye esa revisión de código. No se ha consultado de nuevo el estado remoto ni realizado commit, push o merge.
+Integración completada el 09/09/2026: PRs #1–#5 hacia main, diffs sin cambios al recolocar las bases y CI correcto tras cada incremento. Se verificó que el árbol integrado coincide con 7012519 antes de este ajuste documental. No hay reviews independientes registradas en GitHub.
 
 Para afirmar migración empaquetada completa: verificar arranque, valores conservados y smoke sobre una copia autorizada de la baseline. No confundirlo con el flujo de la base de demo.
 

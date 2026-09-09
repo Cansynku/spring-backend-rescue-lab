@@ -2,7 +2,7 @@
 
 **Caso práctico propio: mejorar una API de pedidos y pagos con pruebas de antes/después.**
 
-No es un encargo de un cliente ni mueve dinero real. La baseline permanece congelada para poder comparar el punto de partida con cada mejora. El trabajo está dividido en PRs revisables y todavía no fusionadas.
+No es un encargo de un cliente ni mueve dinero real. La baseline permanece congelada para poder comparar el punto de partida con cada mejora. Las PRs #1–#5 se integraron secuencialmente en main el 09/09/2026 mediante commits de merge y CI verificado. Se conservaron las ramas originales. La revisión fue asistida por IA y no consta una aprobación independiente en GitHub.
 
 ## Qué ha cambiado
 
@@ -36,7 +36,7 @@ El recorrido es reproducible con las pruebas del repositorio. La referencia a un
 
 Podemos enseñar código propio, fallos reproducidos, cambios revisables y pruebas contra H2/PostgreSQL. Una consulta no equivale a una mejora de latencia medida: todavía no hay benchmark. Tampoco hay pagos reales, clientes conseguidos ni ingresos demostrados.
 
-La demo local tiene el recorrido en navegador verificado y un [guion de presentación](demo-presentation.md). Para aceptar e integrar la pila completa sigue pendiente su revisión conjunta final y una autorización explícita de integración. El arranque empaquetado sobre una copia de la baseline sigue sin verificarse: es una comprobación de migración distinta del smoke de la demo, y no bloquea presentar pedidos y pagos con ese límite declarado. Autenticación, propiedad de los pedidos y reconciliación necesitan contratos propios. La aplicación continúa siendo un laboratorio local, no un servicio listo para producción.
+La demo local tiene el recorrido en navegador verificado y un [guion de presentación](demo-presentation.md). El propietario autorizó la integración de las PRs #1–#5, completada el 09/09/2026 con comprobación de diffs, dependencias y CI; no es una aceptación para producción. El arranque empaquetado sobre una copia de la baseline sigue sin verificarse: es una comprobación de migración distinta del smoke de la demo, y no bloquea presentar pedidos y pagos con ese límite declarado. Autenticación, propiedad de los pedidos y reconciliación necesitan contratos propios. La aplicación continúa siendo un laboratorio local, no un servicio listo para producción.
 
 ## Uso profesional
 
