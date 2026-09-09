@@ -32,3 +32,7 @@ Precio y plazo quedan por acordar después de ese alcance. No se han validado de
 ## Evidencia para acompañarla
 
 [Caso práctico Backend Rescue](project-progress.md): baseline conservada, pagos idempotentes, migraciones verificadas, eliminación de N+1, errores definidos y pruebas de redacción. Mostrar los checks y las limitaciones junto a los resultados.
+
+## Método reutilizable (BRL-011)
+
+[Checklist de revisión](backend-health-check-checklist.md), [plantilla de informe](backend-health-check-report-template.md) y [ejemplo aplicado al laboratorio](backend-health-check-lab-example.md). Revisados localmente el 07/09/2026. El siguiente paso es un piloto sobre un segundo repositorio propio o autorizado y un único flujo; su selección, utilidad y tiempo real siguen pendientes. No es un escáner automático ni una certificación.

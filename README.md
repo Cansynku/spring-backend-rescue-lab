@@ -4,9 +4,24 @@ An intentionally imperfect Java/Spring Boot Orders & Payments API. The goal is t
 
 > **Educational lab — not production-ready.** `baseline-v1` preserves ten intentional limitations. The payment reliability branch fixes the first group. Run on localhost with synthetic data only; no real payment service is connected.
 
+## Review this portfolio case in five minutes
+
+1. [Demo walkthrough and verified limits](docs/demo-presentation.md): create an order, simulate payment and replay without duplication.
+2. [Before/after evidence](docs/project-progress.md): payment reliability, migrations, validation, query count and safe diagnostics.
+3. [Preserved baseline](https://github.com/Cansynku/spring-backend-rescue-lab/tree/baseline-v1) and [five stacked draft PRs](https://github.com/Cansynku/spring-backend-rescue-lab/pulls): follow each problem, change and verification.
+4. [Backend Health Check method](docs/backend-health-check-checklist.md) and [external Alf.io pilot](docs/alfio-review-pilot.md): distinguish reproduced behavior from static evidence.
+
+**Delivery status:** functional local demo, not a production service. The PRs remain drafts and are not merged. This repository uses stacked PRs, not classic Gitflow. Local PostgreSQL evidence recorded 66 passing tests; browser create/pay/replay was verified on 2026-09-07. See the documents for dates and coverage rather than treating historical results as a new run.
+
+This is original educational work developed with AI assistance. The portfolio demonstrates documented reasoning, code review and verification; it does not claim independent third-party review, real payment processing, clients or revenue.
+
 ## Current milestone
 
-**Presentation:** [Resultados para enseñar — before/after portfolio case](docs/project-progress.md). Latest increment: [safe diagnostics and request correlation](docs/observability.md), on `rescue/safe-observability` above PR #3.
+**Interactive local demo:** [Abrir la pantalla de pedidos y pagos](docs/demo-screen.md). The standalone demo responds on port 8083. The [local PostgreSQL instance in WSL](docs/local-postgres-recovery.md) was opened by the user on port 8084 on 2026-09-07: GET / returned 200 and the smoke passed (201/201/200, PAID, one payment). The previous PostgreSQL suite recorded 66 tests with zero failures/errors/skips; neither check was rerun for this documentation update.
+
+**Project scope:** [Las dos lineas: laboratorio y Backend Health Check](docs/project-map.md). The lab is the working example; the health check is a drafted review service, not a second implemented scanner application.
+
+**Presentation:** [Resultados para enseñar — before/after portfolio case](docs/project-progress.md). The demo builds on [safe diagnostics and request correlation](docs/observability.md); PR #5 is stacked above PR #4.
 
 Sprint 0 is frozen as `baseline-v1`. This branch adds order validation and a single-query order list on top of payment reliability and versioned migrations. See [order contract and evidence](docs/order-reliability.md), [migration paths](docs/schema-migrations.md), [payment audit](docs/audit-report.md), [payment contract](docs/payment-contract.md) and [backlog](docs/backlog.md).
 
