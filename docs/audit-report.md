@@ -1,5 +1,7 @@
 # Backend Rescue — payment reliability increment
 
+Historical evidence for PR #1. The follow-up migration branch adds [BR-009 evidence](schema-migrations.md); migration limitations below describe the first payment increment.
+
 ## Executive summary
 
 The `baseline-v1` API accepted repeated payment submissions and performed HTTP during a database transaction. Six regression tests first failed against that implementation. This branch now stores a durable intent, serializes payment reservation for each order, enforces a unique request key, calls the provider outside the transaction, and conservatively retains uncertain outcomes without resubmission.

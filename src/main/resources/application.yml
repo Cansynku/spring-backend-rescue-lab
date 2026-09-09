@@ -11,7 +11,12 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update # BR-009: intentionally no schema migration history.
+      ddl-auto: validate
+  flyway:
+    locations: classpath:db/migration/{vendor}
+    baseline-on-migrate: false
+    clean-disabled: true
+    validate-on-migrate: true
 payment-provider:
   base-url: ${PAYMENT_PROVIDER_BASE_URL:http://127.0.0.1:8080/sandbox-provider}
   connect-timeout-ms: ${PAYMENT_PROVIDER_CONNECT_TIMEOUT_MS:1000}
