@@ -1,6 +1,9 @@
 server:
   address: 127.0.0.1
   port: ${PORT:8080}
+logging:
+  pattern:
+    level: "%5p requestId=%X{requestId:-none}"
 spring:
   application:
     name: spring-backend-rescue-lab

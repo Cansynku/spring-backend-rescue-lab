@@ -41,6 +41,7 @@ public class PaymentService {
             if (isUniqueViolation(conflict)) {
                 try {
                     if (transactions.hasIdempotencyKey(key)) {
+                        LOG.info("payment_conflict category=verified_key_collision");
                         throw new PaymentException(HttpStatus.CONFLICT, "IDEMPOTENCY_CONFLICT",
                                 "This key could not be reserved. Reuse the original request when checking its outcome.");
                     }
@@ -56,6 +57,7 @@ public class PaymentService {
         }
         var payment = reservation.payment();
         if (!reservation.created()) {
+            LOG.info("payment_replay paymentId={} status={}", payment.id(), payment.status());
             return switch (payment.status()) {
                 case AUTHORIZED -> new Result(payment, HttpStatus.OK);
                 case PENDING -> new Result(payment, HttpStatus.ACCEPTED);

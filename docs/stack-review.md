@@ -1,5 +1,7 @@
 # Combined review of draft PRs 1–3
 
+Follow-up: the `rescue/safe-observability` branch addresses REV-03 and REV-04 under the explicit limits in [observability.md](observability.md). The findings below preserve the reviewed historical heads and are not a claim that the follow-up is unchanged.
+
 Review date: 2026-09-06. Verdict at the reviewed heads: **changes required before accepting the combined increment**. Green CI verifies existing cases; it does not resolve the cross-endpoint contract and logging gaps below. The findings preserve that historical snapshot; see the REV-01 follow-up below for its correction. This review does not merge, approve or deploy a PR.
 
 ## Immutable scope and evidence
