@@ -15,20 +15,28 @@ public class PaymentEntity {
     private PurchaseOrderEntity order;
     private BigDecimal amount;
     private String providerPaymentId;
+    @Column(unique = true, length = 128)
+    private String idempotencyKey;
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
     protected PaymentEntity() {}
 
-    public PaymentEntity(PurchaseOrderEntity order, BigDecimal amount, String providerPaymentId, PaymentStatus status) {
+    public PaymentEntity(PurchaseOrderEntity order, BigDecimal amount, String idempotencyKey) {
         this.order = order;
         this.amount = amount;
-        this.providerPaymentId = providerPaymentId;
-        this.status = status;
+        this.idempotencyKey = idempotencyKey;
+        this.status = PaymentStatus.PENDING;
     }
 
     public UUID getId() { return id; }
     public BigDecimal getAmount() { return amount; }
     public String getProviderPaymentId() { return providerPaymentId; }
     public PaymentStatus getStatus() { return status; }
+    public UUID getOrderId() { return order.getId(); }
+    public void authorize(String providerPaymentId) {
+        this.providerPaymentId = providerPaymentId;
+        this.status = PaymentStatus.AUTHORIZED;
+    }
+    public void markUnknown() { this.status = PaymentStatus.UNKNOWN; }
 }

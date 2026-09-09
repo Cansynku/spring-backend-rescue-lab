@@ -1,5 +1,7 @@
 # Intentional finding inventory — baseline
 
+This inventory describes `baseline-v1`. Current branch progress and reproduced before/after evidence are in [audit-report.md](audit-report.md). Do not interpret the baseline descriptions as the current implementation.
+
 These are seeded educational limitations, not findings from a client engagement. Severity describes the **hypothetical production impact**; this local simulator never charges money. Exactly ten findings define the Rescue scope. Code observations below are distinct from tested exploit/failure reproductions.
 
 | ID | Initial severity | Code evidence | Impact and planned verification |

@@ -5,7 +5,7 @@ spring:
   application:
     name: spring-backend-rescue-lab
   datasource:
-    url: ${DB_URL:jdbc:postgresql://127.0.0.1:55432/backend_rescue}
+    url: ${DB_URL:jdbc:postgresql://127.0.0.1:55432/backend_rescue_payments}
     username: ${DB_USERNAME:backend_rescue}
     password: ${DB_PASSWORD:backend_rescue}
   jpa:
@@ -14,3 +14,5 @@ spring:
       ddl-auto: update # BR-009: intentionally no schema migration history.
 payment-provider:
   base-url: ${PAYMENT_PROVIDER_BASE_URL:http://127.0.0.1:8080/sandbox-provider}
+  connect-timeout-ms: ${PAYMENT_PROVIDER_CONNECT_TIMEOUT_MS:1000}
+  read-timeout-ms: ${PAYMENT_PROVIDER_READ_TIMEOUT_MS:2000}

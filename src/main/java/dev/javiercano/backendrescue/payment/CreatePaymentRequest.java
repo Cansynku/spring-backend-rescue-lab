@@ -1,6 +1,8 @@
 package dev.javiercano.backendrescue.payment;
 
 import java.math.BigDecimal;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
-// BR-004: no amount validation or relationship to the order total.
-public record CreatePaymentRequest(BigDecimal amount) {}
+public record CreatePaymentRequest(@NotNull @Positive @Digits(integer = 17, fraction = 2) BigDecimal amount) {}

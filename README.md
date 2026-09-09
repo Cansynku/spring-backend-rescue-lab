@@ -2,11 +2,11 @@
 
 An intentionally imperfect Java/Spring Boot Orders & Payments API. The goal is to demonstrate **finding → evidence → impact → fix → verification** using small, reviewable changes.
 
-> **Educational baseline — not production-ready.** The ten documented limitations are deliberate. Run on localhost with synthetic data only. Payments are simulated; no real payment service is connected.
+> **Educational lab — not production-ready.** `baseline-v1` preserves ten intentional limitations. The payment reliability branch fixes the first group. Run on localhost with synthetic data only; no real payment service is connected.
 
 ## Current milestone
 
-Sprint 0 implements the functional **before** state. The Rescue and its **after** state have not been implemented. See [backlog](docs/backlog.md), [findings](docs/findings.md) and [validation](docs/validation.md) for actual status.
+Sprint 0 is frozen as `baseline-v1`. This branch implements the first Rescue increment: durable payment attempts, idempotency, short database transactions and explicit provider timeouts. See the [before/after audit](docs/audit-report.md), [payment contract](docs/payment-contract.md) and [backlog](docs/backlog.md).
 
 ## Run
 
@@ -20,7 +20,7 @@ mvn clean verify
 mvn spring-boot:run
 ```
 
-The API listens on `http://127.0.0.1:8080`; PostgreSQL is exposed only on `127.0.0.1:55432`. The `backend_rescue` database/user/password are **disposable local demo values**, not real credentials. Do not reuse them elsewhere. Ports are selected to avoid the usual local PostgreSQL port.
+The API listens on `http://127.0.0.1:8080`; PostgreSQL is exposed only on `127.0.0.1:55432`. This branch uses a **fresh `backend_rescue_payments` database and separate Compose volume**, preserving the baseline database. The `backend_rescue` user/password are disposable local demo values, not real credentials. Do not reuse them elsewhere. An existing baseline schema is not upgraded automatically; versioned migrations remain pending.
 
 PowerShell end-to-end check, in another terminal:
 
@@ -30,7 +30,7 @@ PowerShell end-to-end check, in another terminal:
 
 This creates a synthetic order, pays through the local HTTP simulator, then verifies the persisted status and list response. Each run creates another order; it does not clear existing data.
 
-Optional environment variables: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `PORT`, `PAYMENT_PROVIDER_BASE_URL`. If changing `PORT`, also set the provider URL to `http://127.0.0.1:<port>/sandbox-provider`.
+Optional environment variables: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `PORT`, `PAYMENT_PROVIDER_BASE_URL`, `PAYMENT_PROVIDER_CONNECT_TIMEOUT_MS` (default 1000), `PAYMENT_PROVIDER_READ_TIMEOUT_MS` (default 2000). If changing `PORT`, also set the provider URL to `http://127.0.0.1:<port>/sandbox-provider`.
 
 Stop the application with Ctrl+C, then `docker compose stop`. The named database volume is retained.
 
@@ -41,7 +41,7 @@ Stop the application with Ctrl+C, then `docker compose stop`. The named database
 | POST | `/api/orders` | 201, order with `CREATED` status and Location header |
 | GET | `/api/orders/{id}` | 200, order and payment count |
 | GET | `/api/orders` | 200, all orders |
-| POST | `/api/orders/{id}/payments` | 201, simulated authorized payment; order becomes `PAID` |
+| POST | `/api/orders/{id}/payments` | 201 for a new authorization, 200 for a completed replay, 202 for a pending attempt |
 
 Create order payload:
 
@@ -49,7 +49,7 @@ Create order payload:
 {"customerEmail":"demo@example.com","totalAmount":25.50}
 ```
 
-Payment payload:
+Payment payload (also send `Idempotency-Key: demo-payment-001`; reuse the same key only for the same order/amount):
 
 ```json
 {"amount":25.50}
@@ -57,16 +57,18 @@ Payment payload:
 
 `POST /sandbox-provider/charges` is a **test fixture**, not an additional business feature. It returns a fresh fake charge ID on each HTTP request.
 
+An uncertain provider outcome returns 503 and requires reconciliation; the same key never submits another charge. Another key cannot bypass an unresolved attempt. This contract intentionally changes the baseline; see [details and failure limits](docs/payment-contract.md).
+
 ## Design and deliberate limitations
 
-Controllers → transactional services → JPA/PostgreSQL; the payment service calls a synchronous HTTP provider. [Architecture](docs/architecture.md) explains the boundaries.
+Controllers → payment coordinator → short transactions / HTTP provider / short transactions. [Architecture](docs/architecture.md) explains the boundaries.
 
-The baseline intentionally has no idempotency, broad payment transactions, no explicit HTTP timeouts, missing validation, lazy collection N+1 queries, inconsistent errors, happy-path-only H2 tests, open authorization, automatic schema updates and insufficient application logging. [Findings](docs/findings.md) separates code evidence from behavior still requiring reproduction.
+The baseline's ten intentional findings remain recorded in [findings](docs/findings.md). Payment replay/concurrency and provider failure cases now have regression tests. Order input validation, N+1, cross-API error consistency, authentication, schema migrations and complete operational logging remain pending. No production-readiness claim is made.
 
-Three automated tests cover order creation/read, listing and successful payment over a real local HTTP connection with database persistence. **Passing these tests does not establish production readiness or PostgreSQL equivalence.** PostgreSQL smoke verification is recorded separately. Testcontainers, failure scenarios, migrations and security corrections belong to Rescue.
+Run `mvn clean verify` for the H2 suite. For PostgreSQL, create a disposable `backend_rescue_test` database in the local cluster and run `scripts/verify-postgres.ps1`. That command recreates test tables: never target application data. CI runs both H2 and PostgreSQL 17. Tests include HTTP failures/timeouts, concurrent requests, persisted uncertainty and transactional rollback. Testcontainers lifecycle management remains future work; PostgreSQL CI currently uses a GitHub Actions service.
 
 ## Workflow
 
-`baseline` contains the original implementation; `baseline-v1` freezes the verified before state. Future fixes should use separate branches and small commits tied to `BR-001` … `BR-010`, with a failing reproduction before each fix. Do not rewrite the baseline tag.
+`baseline` and `baseline-v1` preserve the verified before state. `rescue/payment-reliability` contains this increment. The initial reproduction commit has six deliberately failing tests against baseline code; the following implementation makes them pass and extends regression coverage. Do not rewrite the baseline tag.
 
 Source code is original demo work. No employer code, documents, infrastructure or real customer data are used.

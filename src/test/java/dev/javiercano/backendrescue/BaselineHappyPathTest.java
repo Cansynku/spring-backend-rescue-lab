@@ -96,6 +96,7 @@ class BaselineHappyPathTest {
     void paysThroughHttpProviderAndPersistsResult() throws Exception {
         var id = createOrder().get("id").asText();
         mvc.perform(post("/api/orders/{id}/payments", id).contentType("application/json")
+                        .header("Idempotency-Key", "happy-path-payment")
                         .content("{\"amount\":25.50}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.orderId").value(id))
