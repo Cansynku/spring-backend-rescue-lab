@@ -5,6 +5,8 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DataAccessException;
+import java.sql.SQLException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -34,8 +36,23 @@ public class PaymentService {
         try {
             reservation = transactions.reserve(orderId, key, request.amount());
         } catch (DataIntegrityViolationException conflict) {
-            throw new PaymentException(HttpStatus.CONFLICT, "IDEMPOTENCY_CONFLICT",
-                    "This key could not be reserved. Reuse the original request when checking its outcome.");
+            // The failed reservation has rolled back. Verify a unique violation AND the stored key,
+            // rather than relying on vendor/generated constraint names in adopted legacy schemas.
+            if (isUniqueViolation(conflict)) {
+                try {
+                    if (transactions.hasIdempotencyKey(key)) {
+                        throw new PaymentException(HttpStatus.CONFLICT, "IDEMPOTENCY_CONFLICT",
+                                "This key could not be reserved. Reuse the original request when checking its outcome.");
+                    }
+                } catch (DataAccessException unavailable) {
+                    throw storageUnavailable();
+                }
+            }
+            LOG.error("payment_reservation_failed category=integrity");
+            throw new PaymentException(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT_PERSISTENCE_FAILED",
+                    "The payment request could not be stored. Do not submit with a different key.");
+        } catch (DataAccessException unavailable) {
+            throw storageUnavailable();
         }
         var payment = reservation.payment();
         if (!reservation.created()) {
@@ -70,5 +87,18 @@ public class PaymentService {
     private PaymentException unknownOutcome() {
         return new PaymentException(HttpStatus.SERVICE_UNAVAILABLE, "PAYMENT_OUTCOME_UNKNOWN",
                 "Payment outcome is uncertain. Reconciliation is required; do not submit another payment.");
+    }
+
+    private boolean isUniqueViolation(Throwable failure) {
+        for (Throwable cause = failure; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SQLException sql && "23505".equals(sql.getSQLState())) { return true; }
+        }
+        return false;
+    }
+
+    private PaymentException storageUnavailable() {
+        LOG.error("payment_reservation_failed category=storage_unavailable");
+        return new PaymentException(HttpStatus.SERVICE_UNAVAILABLE, "PAYMENT_STORAGE_UNAVAILABLE",
+                "Payment storage is unavailable. Use the original key when checking the outcome.");
     }
 }

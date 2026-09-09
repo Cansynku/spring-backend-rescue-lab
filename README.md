@@ -6,7 +6,7 @@ An intentionally imperfect Java/Spring Boot Orders & Payments API. The goal is t
 
 ## Current milestone
 
-Sprint 0 is frozen as `baseline-v1`. This branch adds versioned schema migrations to the payment reliability increment. Flyway creates/evolves tables and Hibernate validates them. See [migration paths and evidence](docs/schema-migrations.md), [payment audit](docs/audit-report.md), [payment contract](docs/payment-contract.md) and [backlog](docs/backlog.md).
+Sprint 0 is frozen as `baseline-v1`. This branch adds order validation and a single-query order list on top of payment reliability and versioned migrations. See [order contract and evidence](docs/order-reliability.md), [migration paths](docs/schema-migrations.md), [payment audit](docs/audit-report.md), [payment contract](docs/payment-contract.md) and [backlog](docs/backlog.md).
 
 ## Run
 
@@ -63,12 +63,12 @@ An uncertain provider outcome returns 503 and requires reconciliation; the same 
 
 Controllers → payment coordinator → short transactions / HTTP provider / short transactions. [Architecture](docs/architecture.md) explains the boundaries.
 
-The baseline's ten intentional findings remain recorded in [findings](docs/findings.md). Payment replay/concurrency, provider failures and schema migrations now have regression tests. Order input validation, N+1, cross-API error consistency, authentication, reconciliation and complete operational logging remain pending. No production-readiness claim is made.
+The baseline's ten intentional findings remain recorded in [findings](docs/findings.md). Payment replay/concurrency, provider failures, schema migrations, order input validation and bounded list query count now have regression tests. Complete cross-API error consistency, authentication, reconciliation and complete operational logging remain pending. No production-readiness claim is made.
 
 Run `mvn clean verify` for H2. For PostgreSQL, create a disposable `backend_rescue_test` database and run `scripts/verify-postgres.ps1`. Tests migrate that database and clear test fixtures; never target application data. Migration tests additionally create/drop their own isolated schemas. CI runs H2 and PostgreSQL 17. Testcontainers lifecycle management remains future work; PostgreSQL CI uses a GitHub Actions service.
 
 ## Workflow
 
-`baseline` and `baseline-v1` preserve the before state. `rescue/payment-reliability` is PR #1; `rescue/schema-migrations` builds on it as a separate review. The initial payment reproduction commit has six deliberately failing tests against baseline code; the following implementation makes them pass. Do not rewrite the baseline tag.
+`baseline` and `baseline-v1` preserve the before state. `rescue/payment-reliability` is PR #1; `rescue/schema-migrations` is PR #2; `rescue/order-validation-queries` builds on PR #2 for a focused review. Both payment and order increments preserve test-only failing checkpoints followed by fixes. Do not rewrite the baseline tag.
 
 Source code is original demo work. No employer code, documents, infrastructure or real customer data are used.

@@ -5,11 +5,13 @@ Scope: BR-001, BR-002 and BR-003, with the payment input/error handling required
 ## Client contract (breaking relative to baseline-v1)
 
 - `POST /api/orders/{id}/payments` requires `Idempotency-Key`: 1–128 ASCII letters, digits, `.`, `_` or `-`.
-- A payment must be positive, have at most two decimal places, and equal the order total. There are no partial payments or currency conversion in this lab.
+- A payment must be positive, have at most 17 integer digits and two decimal places, and equal the order total. New orders use the same maximum, `99999999999999999.99`. Legacy orders above that amount remain readable but are unsupported by this payment API; their amounts are not rewritten. There are no partial payments or currency conversion in this lab.
 - The key identifies one order and one numeric amount. Equivalent decimal representations (25.5 and 25.50) are the same request. Reusing a key for a different request is 409.
 - A new successful payment returns 201. A completed replay returns 200 with the original payment ID. A request already in progress returns 202 with its payment ID and `PENDING` status. Clients must understand this additional enum value.
 - A provider error, timeout, invalid provider result, or failed local completion is treated conservatively as an uncertain outcome. The API returns 503 with an application error code. Retries of that key never submit another charge. Another key cannot bypass an unresolved attempt or pay an already paid order.
 - Missing order: 404. Missing key or invalid amount/key: 400. An order that is not payable or a changed request: 409.
+- Malformed payment UUIDs and JSON return 400 ProblemDetail with `INVALID_PAYMENT_REQUEST`. Invalid order requests use `INVALID_ORDER_REQUEST`. Their `instance` is a fixed endpoint-family URN so malformed path input is not echoed; it is not a request correlation ID.
+- A reservation uniqueness exception is classified as `IDEMPOTENCY_CONFLICT` only when SQLSTATE 23505 is accompanied by a persisted matching key, checked in a fresh transaction after rollback. This avoids dependence on generated legacy constraint names. Other reservation integrity failures return 500 `PAYMENT_PERSISTENCE_FAILED`. A reservation/key-lookup data-access failure returns 503 `PAYMENT_STORAGE_UNAVAILABLE`. Neither exposes SQL details or calls the provider; use the original key when checking outcomes. Failures after provider submission still follow the existing uncertain-outcome policy.
 
 Known consumers: the repository's happy-path test and PowerShell smoke script; both will be updated. No external consumer deployment is known or asserted.
 

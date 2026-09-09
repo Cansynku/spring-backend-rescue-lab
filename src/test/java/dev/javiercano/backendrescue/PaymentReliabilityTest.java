@@ -18,6 +18,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -132,6 +133,38 @@ class PaymentReliabilityTest {
         assertThat(body(replay).get("id")).isEqualTo(body(first).get("id"));
         assertThat(CALLS.get()).isEqualTo(1);
         assertThat(payments.count()).isEqualTo(1);
+    }
+
+    @Test
+    void largestPayableOrderCanBeCreatedPaidAndReplayedExactly() throws Exception {
+        var amount = "99999999999999999.99";
+        var created = mvc.perform(post("/api/orders").contentType("application/json")
+                        .content("{\"customerEmail\":\"demo@example.com\",\"totalAmount\":" + amount + "}"))
+                .andExpect(status().isCreated()).andReturn();
+        var id = body(created).get("id").asText();
+        var paid = pay(id, "maximum-amount-key", amount);
+        assertThat(paid.getResponse().getStatus()).isEqualTo(201);
+        var replay = pay(id, "maximum-amount-key", amount);
+        assertThat(replay.getResponse().getStatus()).isEqualTo(200);
+        assertThat(body(replay).get("id")).isEqualTo(body(paid).get("id"));
+        assertThat(CALLS.get()).isEqualTo(1);
+        assertThat(payments.count()).isEqualTo(1);
+        assertThat(payments.findByIdempotencyKey("maximum-amount-key").orElseThrow().getAmount())
+                .isEqualByComparingTo(amount);
+        var order = orders.findById(java.util.UUID.fromString(id)).orElseThrow();
+        assertThat(order.getTotalAmount()).isEqualByComparingTo(amount);
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PAID);
+    }
+
+    @Test
+    void nextCentAbovePayableMaximumIsRejectedBeforeOrderPersistence() throws Exception {
+        mvc.perform(post("/api/orders").contentType("application/json")
+                        .content("{\"customerEmail\":\"demo@example.com\",\"totalAmount\":100000000000000000.00}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_ORDER_REQUEST"));
+        assertThat(orders.count()).isZero();
+        assertThat(payments.count()).isZero();
+        assertThat(CALLS.get()).isZero();
     }
 
     @Test
@@ -314,6 +347,69 @@ class PaymentReliabilityTest {
         pay(order, "changed-amount-key", "25.50");
         assertThat(pay(order, "changed-amount-key", "24.50").getResponse().getStatus()).isEqualTo(409);
         assertThat(CALLS.get()).isEqualTo(1);
+    }
+
+    @Test
+    void malformedIdentifierAndJsonHaveSafeProblemDetails() throws Exception {
+        var malformedId = mvc.perform(post("/api/orders/private-invalid-id/payments")
+                        .header("Idempotency-Key", "private-key").contentType("application/json")
+                        .content("{\"amount\":25.50}"))
+                .andExpect(status().isBadRequest()).andReturn();
+        assertProblem(malformedId, 400, "INVALID_PAYMENT_REQUEST");
+        var malformedBody = mvc.perform(post("/api/orders/{id}/payments", order())
+                        .header("Idempotency-Key", "private-key").contentType("application/json")
+                        .content("{private-body"))
+                .andExpect(status().isBadRequest()).andReturn();
+        assertProblem(malformedBody, 400, "INVALID_PAYMENT_REQUEST");
+        assertThat(CALLS.get()).isZero();
+        assertThat(payments.count()).isZero();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"23502", "23503", "23505"})
+    void unrelatedIntegrityFailureIsNotAnIdempotencyConflict(String sqlState) throws Exception {
+        doThrow(new DataIntegrityViolationException("private-storage-detail",
+                new java.sql.SQLException("private-sql-detail", sqlState)))
+                .when(transactions).reserve(any(), anyString(), any());
+        assertProblem(pay(order(), "private-key", "25.50"), 500, "PAYMENT_PERSISTENCE_FAILED");
+        assertThat(CALLS.get()).isZero();
+        assertThat(payments.count()).isZero();
+    }
+
+    @Test
+    void unavailableReservationStorageReturnsSafe503() throws Exception {
+        doThrow(new DataAccessResourceFailureException("private-storage-detail"))
+                .when(transactions).reserve(any(), anyString(), any());
+        assertProblem(pay(order(), "private-key", "25.50"), 503, "PAYMENT_STORAGE_UNAVAILABLE");
+        assertThat(CALLS.get()).isZero();
+    }
+
+    @Test
+    void failedKeyVerificationDoesNotClaimConflictOrCallProvider() throws Exception {
+        doThrow(new DataIntegrityViolationException("private-storage-detail",
+                new java.sql.SQLException("private-sql-detail", "23505")))
+                .when(transactions).reserve(any(), anyString(), any());
+        doThrow(new DataAccessResourceFailureException("private-lookup-detail"))
+                .when(transactions).hasIdempotencyKey(anyString());
+        assertProblem(pay(order(), "private-key", "25.50"), 503, "PAYMENT_STORAGE_UNAVAILABLE");
+        assertThat(CALLS.get()).isZero();
+    }
+
+    @Test
+    void missingOrderAndChangedRequestKeepDefinedProblemDetails() throws Exception {
+        assertProblem(pay(java.util.UUID.randomUUID().toString(), "private-key", "25.50"), 404, "ORDER_NOT_FOUND");
+        var id = order();
+        assertThat(pay(id, "contract-key", "25.50").getResponse().getStatus()).isEqualTo(201);
+        assertProblem(pay(id, "contract-key", "24.50"), 409, "IDEMPOTENCY_CONFLICT");
+        assertThat(CALLS.get()).isEqualTo(1);
+    }
+
+    private void assertProblem(MvcResult result, int status, String code) throws Exception {
+        assertThat(result.getResponse().getStatus()).isEqualTo(status);
+        assertThat(result.getResponse().getContentType()).startsWith("application/problem+json");
+        assertThat(body(result).get("status").asInt()).isEqualTo(status);
+        assertThat(body(result).get("code").asText()).isEqualTo(code);
+        assertThat(result.getResponse().getContentAsString()).doesNotContain("private-", "23505", "SQLException");
     }
 
     @ParameterizedTest

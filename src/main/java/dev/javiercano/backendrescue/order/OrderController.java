@@ -3,6 +3,7 @@ package dev.javiercano.backendrescue.order;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +15,7 @@ public class OrderController {
     public OrderController(OrderService service) { this.service = service; }
 
     @PostMapping
-    public ResponseEntity<OrderResponse> create(@RequestBody CreateOrderRequest request) {
+    public ResponseEntity<OrderResponse> create(@Valid @RequestBody CreateOrderRequest request) {
         var result = service.create(request);
         return ResponseEntity.created(URI.create("/api/orders/" + result.id())).body(result);
     }
