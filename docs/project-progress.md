@@ -41,3 +41,8 @@ La demo local tiene el recorrido en navegador verificado y un [guion de presenta
 ## Uso profesional
 
 Este material sirve como caso de portfolio: explicar un problema, reproducirlo, aplicar una corrección pequeña y mostrar su prueba. Ya hay un [borrador de oferta Backend Health Check](backend-health-check-offer.md) con alcance, entregables y preguntas para un primer piloto. No se ha enviado a nadie; precio, plazo y demanda siguen pendientes de validar.
+
+## Paginación — 10/09/2026
+
+Implementada en una rama de trabajo: [contrato y límites](order-pagination.md). La API anterior conserva su formato; la pantalla consulta páginas de 20 pedidos. Validación local H2: 73 casos, cero fallos/errores y cuatro omisiones exclusivas de PostgreSQL; cinco pruebas de pantalla correctas. La ejecución PostgreSQL local falló por conexión rechazada en 55433; no constituye un resultado de regresión. La validación PostgreSQL y la integración se comprueban mediante la CI de la PR.
+

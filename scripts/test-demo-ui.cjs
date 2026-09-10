@@ -6,7 +6,7 @@ const vm = require('node:vm');
 const {randomUUID} = require('node:crypto');
 const source = readFileSync(join(__dirname, '../src/main/resources/static/demo.js'), 'utf8');
 
-async function screen({stored = new Map(), failPayment = false, storageBlocked = false} = {}) {
+async function screen({stored = new Map(), failPayment = false, storageBlocked = false, omitFromPage = false} = {}) {
   const elements = new Map(), calls = [];
   const element = () => ({textContent: '', value: '', children: [], handlers: {},
     classList: {toggle() {}, add() {}, remove() {}},
@@ -21,11 +21,12 @@ async function screen({stored = new Map(), failPayment = false, storageBlocked =
     }},
     fetch: async (path, options) => {
       calls.push({path, options});
-      let status = 200, data = [order];
+      let status = 200, data = {items: omitFromPage ? [] : [order], totalPages: 2, totalElements: 21};
       if (path.endsWith('/payments')) {
         if (failPayment) { failPayment = false; throw new Error('lost response'); }
         order.status = 'PAID'; order.paymentCount = 1; data = {status: 'AUTHORIZED'};
       } else if (options.method === 'POST') { status = 201; data = order; }
+      else if (path === `/api/orders/${order.id}`) { data = order; }
       return {ok: status < 400, status, json: async () => data, headers: {get: () => 'test-request-id'}};
     }});
   vm.runInContext(source, context);
@@ -49,6 +50,30 @@ test('payment retries and reloaded page reuse the persisted key after a lost res
 test('blocked storage prevents submitting a payment without a durable browser key', async () => {
   const ui = await screen({storageBlocked: true}); await ui.pay();
   assert.equal(ui.calls.filter(c => c.path.endsWith('/payments')).length, 0);
+});
+
+test('navigation requests bounded pages and disables both outer boundaries', async () => {
+  const ui = await screen();
+  assert.equal(ui.get('previous').disabled, true);
+  assert.equal(ui.get('next').disabled, false);
+  await ui.get('next').handlers.click();
+  assert.equal(ui.calls.at(-1).path, '/api/orders/page?page=1&size=20');
+  assert.equal(ui.get('next').disabled, true);
+  await ui.get('next').handlers.click();
+  assert.equal(ui.calls.length, 2);
+  await ui.get('previous').handlers.click();
+  assert.equal(ui.calls.at(-1).path, '/api/orders/page?page=0&size=20');
+  assert.equal(ui.get('previous').disabled, true);
+});
+
+test('new order outside the current page remains payable and refreshes after payment', async () => {
+  const ui = await screen({omitFromPage: true});
+  ui.get('email').value = 'demo@example.com'; ui.get('amount').value = '25';
+  await ui.get('create-form').handlers.submit({preventDefault() {}});
+  assert.equal(vm.runInContext('orders.length', ui.context), 1);
+  await ui.pay();
+  assert.equal(vm.runInContext('orders[0].status', ui.context), 'PAID');
+  assert.equal(vm.runInContext('orders[0].paymentCount', ui.context), 1);
 });
 
 test('invalid amount is rejected locally and a comma amount is sent correctly', async () => {

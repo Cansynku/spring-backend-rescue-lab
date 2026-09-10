@@ -32,7 +32,7 @@ Integración completada el 09/09/2026: PRs #1–#5 hacia main, diffs sin cambios
 
 Para afirmar migración empaquetada completa: verificar arranque, valores conservados y smoke sobre una copia autorizada de la baseline. No confundirlo con el flujo de la base de demo.
 
-Para un uso real: definir identidad/propiedad, reconciliación del proveedor, volumen/paginación y requisitos operativos de exposición, secretos y recuperación. Son trabajo posterior, no nuevas funcionalidades de este cierre. Testcontainers, benchmarks y despliegue público no son requisitos de la demo.
+Para un uso real: definir identidad/propiedad, reconciliación del proveedor, volumen y compatibilidad de la lista antigua sin límite y requisitos operativos de exposición, secretos y recuperación. Son trabajo posterior, no nuevas funcionalidades de este cierre. Testcontainers, benchmarks y despliegue público no son requisitos de la demo.
 
 ## Piloto mínimo propuesto
 

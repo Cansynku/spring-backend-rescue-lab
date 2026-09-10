@@ -2,6 +2,7 @@
 const $ = id => document.getElementById(id);
 const money = new Intl.NumberFormat('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 let orders = [], busy = false, connected = false;
+let page = 0, totalPages = 0, totalElements = 0, recentId = null;
 const storageKey = id => `backend-rescue-payment:${id}`;
 function knownKey(id) { try { return localStorage.getItem(storageKey(id)); } catch { return null; } }
 function show(title, message, reference = '', error = false) {
@@ -17,6 +18,9 @@ async function request(path, options) {
 }
 function node(tag, className, value) { const element = document.createElement(tag); element.className = className; element.textContent = value; return element; }
 function render() {
+  $('previous').disabled = busy || !connected || page === 0;
+  $('next').disabled = busy || !connected || page + 1 >= totalPages;
+  $('page-status').textContent = connected ? `Página ${page + 1} de ${Math.max(1, totalPages)} · ${totalElements} pedidos en total` : 'Paginación no disponible';
   $('total').textContent = connected ? orders.length : '—';
   $('paid').textContent = connected ? orders.filter(o => o.status === 'PAID').length : '—';
   $('unpaid').textContent = connected ? orders.filter(o => o.status !== 'PAID').length : '—';
@@ -25,6 +29,7 @@ function render() {
   for (const order of orders) {
     const row = node('article', 'order', ''); const detail = node('div', '', '');
     detail.append(node('p', 'email', order.customerEmail || 'Pedido antiguo sin correo'));
+    if (order.id === recentId) detail.append(node('small', '', 'Último pedido creado en esta sesión'));
     detail.append(node('p', 'order-meta order-id', `Pedido ${order.id.slice(0, 8)}`));
     const paid = order.status === 'PAID', review = !paid && order.paymentCount > 0;
     detail.append(node('span', `badge ${paid ? 'paid' : review ? 'review' : ''}`, paid ? 'Pagado' : review ? 'Necesita revisión' : order.status === 'CANCELLED' ? 'Cancelado' : 'Sin pagar'));
@@ -42,9 +47,16 @@ function render() {
 }
 async function refresh() {
   try {
-    const {response, data} = await request('/api/orders');
-    if (!response.ok || !Array.isArray(data)) throw new Error('unavailable');
-    orders = data; connected = true; $('connection').textContent = '● Conectado'; $('connection').classList.add('ready');
+    const {response, data} = await request(`/api/orders/page?page=${page}&size=20`);
+    if (!response.ok || !Array.isArray(data.items)) throw new Error('unavailable');
+    const visible = [...data.items];
+    if (recentId && !visible.some(order => order.id === recentId)) {
+      const recent = await request(`/api/orders/${recentId}`);
+      if (!recent.response.ok) throw new Error('unavailable');
+      visible.unshift(recent.data);
+    }
+    orders = visible; totalPages = data.totalPages; totalElements = data.totalElements;
+    connected = true; $('connection').textContent = '● Conectado'; $('connection').classList.add('ready');
   } catch {
     connected = false; $('connection').textContent = 'Sin conexión · datos no actualizados'; $('connection').classList.remove('ready');
   }
@@ -58,7 +70,8 @@ $('create-form').addEventListener('submit', async event => {
   }
   lock(true);
   try {
-    const {response, reference} = await request('/api/orders', {method: 'POST', body: JSON.stringify({customerEmail: $('email').value.trim(), totalAmount: Number(amount)})});
+    const {response, data, reference} = await request('/api/orders', {method: 'POST', body: JSON.stringify({customerEmail: $('email').value.trim(), totalAmount: Number(amount)})});
+    if (response.ok) recentId = data.id;
     show(response.ok ? 'Pedido creado' : 'No se ha creado el pedido', response.ok ? 'Ya puedes simular su pago en la lista.' : 'Comprueba el correo y el importe e inténtalo de nuevo.', reference, !response.ok);
   } catch { show('No hemos podido confirmar la creación', 'Actualiza la lista antes de volver a crear el pedido: puede haberse guardado.', '', true); }
   await refresh(); lock(false);
@@ -78,4 +91,12 @@ async function pay(order) {
   await refresh(); lock(false);
 }
 $('refresh').addEventListener('click', async () => { if (busy) return; lock(true); await refresh(); lock(false); });
+for (const [id, delta] of [['previous', -1], ['next', 1]]) {
+  $(id).addEventListener('click', async () => {
+    if (busy || !connected || page + delta < 0 || page + delta >= totalPages) return;
+    lock(true); page += delta; await refresh();
+    if (!connected) page -= delta;
+    lock(false);
+  });
+}
 refresh();

@@ -134,4 +134,40 @@ class OrderReliabilityTest {
         assertThat(result.stream().collect(Collectors.toMap(OrderResponse::id, OrderResponse::paymentCount)))
                 .isEqualTo(expected);
     }
+
+    @Test
+    void pagesPreserveCardinalityCountsAndStableOrder() throws Exception {
+        var paid = orders.save(new PurchaseOrderEntity("demo@example.com", BigDecimal.TEN));
+        payments.save(new PaymentEntity(paid, BigDecimal.TEN, "one"));
+        payments.save(new PaymentEntity(paid, BigDecimal.TEN, "two"));
+        for (int i = 0; i < 4; i++) orders.save(new PurchaseOrderEntity(null, null));
+        var first = service.page(0, 2);
+        assertThat(first.totalElements()).isEqualTo(5);
+        assertThat(first.totalPages()).isEqualTo(3);
+        assertThat(service.page(0, 2).items()).isEqualTo(first.items());
+        var all = java.util.stream.IntStream.range(0, 3)
+                .boxed().flatMap(page -> service.page(page, 2).items().stream()).toList();
+        assertThat(all).hasSize(5);
+        assertThat(all.stream().map(OrderResponse::id)).doesNotHaveDuplicates();
+        assertThat(all.stream().filter(o -> o.id().equals(paid.getId())).findFirst().orElseThrow().paymentCount()).isEqualTo(2);
+        assertThat(service.page(3, 2).items()).isEmpty();
+        mvc.perform(get("/api/orders/page").param("size", "2"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.items.length()").value(2))
+                .andExpect(jsonPath("$.totalElements").value(5));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"page=-1", "size=0", "size=101", "page=no", "page=2147483647&size=100"})
+    void invalidPaginationIsRejected(String query) throws Exception {
+        mvc.perform(get("/api/orders/page?" + query)).andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith("application/problem+json"));
+    }
+
+    @Test
+    void emptyPageHasExplicitMetadata() throws Exception {
+        mvc.perform(get("/api/orders/page")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isEmpty()).andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(20)).andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.totalPages").value(0));
+    }
 }

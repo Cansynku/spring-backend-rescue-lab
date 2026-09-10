@@ -89,3 +89,6 @@ Run `mvn clean verify` for H2. For PostgreSQL, create a disposable `backend_resc
 `baseline` and `baseline-v1` preserve the before state. `rescue/payment-reliability` is PR #1; `rescue/schema-migrations` is PR #2; `rescue/order-validation-queries` builds on PR #2 for a focused review. Both payment and order increments preserve test-only failing checkpoints followed by fixes. Do not rewrite the baseline tag.
 
 Source code is original demo work. No employer code, documents, infrastructure or real customer data are used.
+
+Order browsing: [paginated API and demo navigation](docs/order-pagination.md), with the legacy array API preserved.
+

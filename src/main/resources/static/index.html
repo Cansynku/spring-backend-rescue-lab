@@ -10,7 +10,7 @@
   <header><a class="brand" href="/">BR<span>Backend Rescue</span></a><span class="demo-label">Laboratorio · Sin dinero real</span></header>
   <main>
     <div class="heading"><div><p class="eyebrow">TU ESPACIO DE PRUEBAS</p><h1>Pedidos y pagos</h1><p>Crea un pedido, simula su pago y comprueba el resultado.</p></div><span id="connection" class="connection">Conectando…</span></div>
-    <section class="stats" aria-label="Resumen de pedidos"><div><span>Pedidos</span><strong id="total">—</strong></div><div><span>Pagados</span><strong id="paid">—</strong></div><div><span>Sin pagar</span><strong id="unpaid">—</strong></div></section>
+    <section class="stats" aria-label="Resumen de pedidos visibles"><div><span>Pedidos visibles</span><strong id="total">—</strong></div><div><span>Pagados visibles</span><strong id="paid">—</strong></div><div><span>Sin pagar visibles</span><strong id="unpaid">—</strong></div></section>
     <div class="workspace">
       <section class="panel create"><span class="step">01 / CREAR</span><h2>Nuevo pedido</h2><p>Utiliza un correo de prueba.</p>
         <form id="create-form">
@@ -23,6 +23,8 @@
       </section>
       <section class="panel orders"><div class="section-heading"><div><span class="step">02 / PROBAR</span><h2>Tus pedidos</h2></div><button id="refresh" class="secondary" type="button">Actualizar</button></div>
         <p class="list-help">Simula un pago o repite una petición para comprobar que no se duplica.</p>
+        <nav aria-label="Páginas de pedidos"><button id="previous" class="secondary" type="button" disabled>Anterior</button> <span id="page-status" role="status"></span> <button id="next" class="secondary" type="button" disabled>Siguiente</button></nav>
+        <p>20 pedidos por página. El último pedido creado permanece visible aunque esté en otra página.</p>
         <div id="orders" aria-live="polite"><p class="empty">Cargando pedidos…</p></div>
       </section>
     </div>
