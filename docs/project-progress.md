@@ -44,4 +44,4 @@ Este material sirve como caso de portfolio: explicar un problema, reproducirlo, 
 
 ## Paginación — 10/09/2026
 
-Implementada en una rama de trabajo: [contrato y límites](order-pagination.md). La API anterior conserva su formato; la pantalla consulta páginas de 20 pedidos. Validación local H2: 73 casos, cero fallos/errores y cuatro omisiones exclusivas de PostgreSQL; cinco pruebas de pantalla correctas. La ejecución PostgreSQL local falló por conexión rechazada en 55433; no constituye un resultado de regresión. La validación PostgreSQL y la integración se comprueban mediante la CI de la PR.
+Incremento de navegación: [contrato y límites](order-pagination.md). La API anterior conserva su formato; la pantalla consulta páginas de 20 pedidos. Validación local H2: 73 casos, cero fallos/errores y cuatro omisiones exclusivas de PostgreSQL; cinco pruebas de pantalla correctas. La ejecución PostgreSQL local falló por conexión rechazada en 55433; no constituye un resultado de regresión. La CI de la [PR #7](https://github.com/Cansynku/spring-backend-rescue-lab/pull/7) pasó en H2 y PostgreSQL; el estado de integración se consulta en esa PR.
