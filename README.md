@@ -91,4 +91,3 @@ Run `mvn clean verify` for H2. For PostgreSQL, create a disposable `backend_resc
 Source code is original demo work. No employer code, documents, infrastructure or real customer data are used.
 
 Order browsing: [paginated API and demo navigation](docs/order-pagination.md), with the legacy array API preserved.
-

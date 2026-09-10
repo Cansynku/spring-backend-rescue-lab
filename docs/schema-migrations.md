@@ -61,4 +61,3 @@ Complete the blocked packaged-app check on a baseline copy when normal execution
 ## Packaged check follow-up — 2026-09-10
 
 A synthetic baseline fixture was copied through pg_dump into a separate schema of the disposable test database. This is not a recovered historical database. The package compiled, but automatic approval review rejected its isolated startup with 'blocked by policy'. No packaged migration or smoke result is claimed; the check remains pending. The running demo databases were not migrated.
-
