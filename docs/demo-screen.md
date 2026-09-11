@@ -1,3 +1,5 @@
+Estado actual (11/09/2026): demo PostgreSQL 8084 arrancada mediante el lanzador actual; HTTP 200 y smoke de creación/pago/repetición PASS. Para presentar usa el [guion actualizado](demo-presentation.md). Los apartados siguientes conservan el contexto de los lanzadores y comprobaciones anteriores.
+
 # Pantalla de demostración
 
 La app ya incluye una pantalla en español para crear pedidos, simular pagos y comprobar que repetir una petición no duplica el pago. Se sirve desde el propio backend; no necesita una aplicación frontend ni dependencias instaladas aparte.

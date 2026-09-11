@@ -21,8 +21,7 @@ pago 201, repetición 200, PAID y un pago. Evidencia comunicada en el punto de
 continuidad; no se ha vuelto a ejecutar el smoke en este cierre documental.
 Los informes de la suite previa en `.local/pg-wsl-validation/target/surefire-reports` se han releído: 66 tests, cero fallos, errores y omisiones; no es una nueva ejecución.
 
-El paquete verificado esta en `.local/pg-wsl-validation/target/`. El lanzador usa
-ese paquete y, si no existe, `target/`. Para recompilar desde el repositorio,
+El paquete histórico se conserva en `.local/pg-wsl-validation/target/`. El lanzador usa exclusivamente `target/` de la copia actual. Para recompilar desde el repositorio,
 usar Java 21 y `mvn clean verify`; para verificar PostgreSQL usar
 `scripts/verify-postgres.ps1 -Port 55433 -WslDistribution BackendRescue`. El script mantiene una sesión WSL durante las pruebas y cierra solo ese proceso al terminar, incluso si falla Maven. No reinicia PostgreSQL ni termina otras sesiones. Esa verificacion utiliza
 exclusivamente `backend_rescue_test`, que contiene datos desechables.

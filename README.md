@@ -8,10 +8,10 @@ An intentionally imperfect Java/Spring Boot Orders & Payments API. The goal is t
 
 1. [Demo walkthrough and verified limits](docs/demo-presentation.md): create an order, simulate payment and replay without duplication.
 2. [Before/after evidence](docs/project-progress.md): payment reliability, migrations, validation, query count and safe diagnostics.
-3. [Preserved baseline](https://github.com/Cansynku/spring-backend-rescue-lab/tree/baseline-v1) and [five merged increments](https://github.com/Cansynku/spring-backend-rescue-lab/pulls?q=is%3Apr+is%3Amerged): follow each problem, change and verification.
+3. [Preserved baseline](https://github.com/Cansynku/spring-backend-rescue-lab/tree/baseline-v1) and [merged increments](https://github.com/Cansynku/spring-backend-rescue-lab/pulls?q=is%3Apr+is%3Amerged): follow each problem, change and verification.
 4. [Backend Health Check method](docs/backend-health-check-checklist.md) and [external Alf.io pilot](docs/alfio-review-pilot.md): distinguish reproduced behavior from static evidence.
 
-**Delivery status:** functional local demo, not a production service. PRs #1–#5 were integrated sequentially into main on 2026-09-09 with merge commits and successful CI on each integrated increment. The baseline branch, baseline-v1 tag and source branches are preserved. This repository uses stacked PRs, not classic Gitflow; no independent reviewer approval is claimed. Local PostgreSQL evidence recorded 66 passing tests; browser create/pay/replay was verified on 2026-09-07. See the documents for dates and coverage rather than treating historical results as a new run.
+**Delivery status:** functional local demo, not a production service. PRs #1–#5 were integrated sequentially into main on 2026-09-09 with merge commits and successful CI on each integrated increment. The baseline branch, baseline-v1 tag and source branches are preserved. This repository uses stacked PRs, not classic Gitflow; no independent reviewer approval is claimed. PR #9 verified 73 local PostgreSQL tests; PRs #7–#8 added paginated browsing and recovery. Browser create/pay/replay was previously verified on 2026-09-07. See the documents for dates and coverage rather than treating historical results as a new run.
 
 This is original educational work developed with AI assistance. The portfolio demonstrates documented reasoning, code review and verification; it does not claim independent third-party review, real payment processing, clients or revenue.
 
