@@ -82,7 +82,7 @@ Controllers → payment coordinator → short transactions / HTTP provider / sho
 
 The baseline's ten intentional findings remain recorded in [findings](docs/findings.md). Payment replay/concurrency, provider failures, schema migrations, order input validation and bounded list query count now have regression tests. Complete cross-API error consistency, authentication, reconciliation and complete operational logging remain pending. No production-readiness claim is made.
 
-Run `mvn clean verify` for H2. For PostgreSQL, create a disposable `backend_rescue_test` database and run `scripts/verify-postgres.ps1`. Tests migrate that database and clear test fixtures; never target application data. Migration tests additionally create/drop their own isolated schemas. CI runs H2 and PostgreSQL 17. Testcontainers lifecycle management remains future work; PostgreSQL CI uses a GitHub Actions service.
+Run `mvn clean verify` for H2. For PostgreSQL, create a disposable `backend_rescue_test` database and run `scripts/verify-postgres.ps1`. For the existing WSL setup, pass `-Port 55433 -WslDistribution BackendRescue` to keep WSL alive during verification. Omitting the distribution preserves external PostgreSQL usage. Tests migrate that database and clear test fixtures; never target application data. Migration tests additionally create/drop their own isolated schemas. CI runs H2 and PostgreSQL 17. Testcontainers lifecycle management remains future work; PostgreSQL CI uses a GitHub Actions service.
 
 ## Workflow
 

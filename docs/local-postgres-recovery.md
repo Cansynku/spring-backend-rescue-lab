@@ -24,7 +24,7 @@ Los informes de la suite previa en `.local/pg-wsl-validation/target/surefire-rep
 El paquete verificado esta en `.local/pg-wsl-validation/target/`. El lanzador usa
 ese paquete y, si no existe, `target/`. Para recompilar desde el repositorio,
 usar Java 21 y `mvn clean verify`; para verificar PostgreSQL usar
-`scripts/verify-postgres.ps1 -Port 55433` con WSL activo. Esa verificacion utiliza
+`scripts/verify-postgres.ps1 -Port 55433 -WslDistribution BackendRescue`. El script mantiene una sesión WSL durante las pruebas y cierra solo ese proceso al terminar, incluso si falla Maven. No reinicia PostgreSQL ni termina otras sesiones. Esa verificacion utiliza
 exclusivamente `backend_rescue_test`, que contiene datos desechables.
 
 ## Bases separadas
