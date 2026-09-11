@@ -47,15 +47,21 @@ function render() {
 }
 async function refresh() {
   try {
-    const {response, data} = await request(`/api/orders/page?page=${page}&size=20`);
+    let requestedPage = page;
+    let {response, data} = await request(`/api/orders/page?page=${requestedPage}&size=20`);
     if (!response.ok || !Array.isArray(data.items)) throw new Error('unavailable');
+    if (requestedPage > 0 && requestedPage >= data.totalPages) {
+      requestedPage = 0;
+      ({response, data} = await request('/api/orders/page?page=0&size=20'));
+      if (!response.ok || !Array.isArray(data.items)) throw new Error('unavailable');
+    }
     const visible = [...data.items];
     if (recentId && !visible.some(order => order.id === recentId)) {
       const recent = await request(`/api/orders/${recentId}`);
       if (!recent.response.ok) throw new Error('unavailable');
       visible.unshift(recent.data);
     }
-    orders = visible; totalPages = data.totalPages; totalElements = data.totalElements;
+    page = requestedPage; orders = visible; totalPages = data.totalPages; totalElements = data.totalElements;
     connected = true; $('connection').textContent = '● Conectado'; $('connection').classList.add('ready');
   } catch {
     connected = false; $('connection').textContent = 'Sin conexión · datos no actualizados'; $('connection').classList.remove('ready');
