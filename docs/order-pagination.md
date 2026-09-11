@@ -9,3 +9,5 @@ GET /api/orders remains the compatible, unbounded array endpoint. The demo uses 
 Acceptance coverage: static pages without duplicates, accurate totals/payment counts, empty pages, invalid parameters, navigation boundaries and paying a newly created order outside the page. See OrderReliabilityTest and scripts/test-demo-ui.cjs.
 
 No schema, dependency, authentication or provider changes. Production still needs an explicit decision about volume and compatibility of the unbounded legacy route.
+
+If the collection shrinks and the displayed page no longer exists, the demo loads the first page with one additional request. Failed navigation preserves the previous page; Refresh restores controls after connectivity returns. Both behaviors are covered by the seven browser-logic tests.

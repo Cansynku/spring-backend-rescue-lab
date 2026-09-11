@@ -6,7 +6,7 @@ const vm = require('node:vm');
 const {randomUUID} = require('node:crypto');
 const source = readFileSync(join(__dirname, '../src/main/resources/static/demo.js'), 'utf8');
 
-async function screen({stored = new Map(), failPayment = false, storageBlocked = false, omitFromPage = false} = {}) {
+async function screen({stored = new Map(), failPayment = false, storageBlocked = false, omitFromPage = false, pageReply = null} = {}) {
   const elements = new Map(), calls = [];
   const element = () => ({textContent: '', value: '', children: [], handlers: {},
     classList: {toggle() {}, add() {}, remove() {}},
@@ -22,6 +22,7 @@ async function screen({stored = new Map(), failPayment = false, storageBlocked =
     fetch: async (path, options) => {
       calls.push({path, options});
       let status = 200, data = {items: omitFromPage ? [] : [order], totalPages: 2, totalElements: 21};
+      if (path.startsWith('/api/orders/page') && pageReply) data = pageReply(path, data);
       if (path.endsWith('/payments')) {
         if (failPayment) { failPayment = false; throw new Error('lost response'); }
         order.status = 'PAID'; order.paymentCount = 1; data = {status: 'AUTHORIZED'};
@@ -86,4 +87,34 @@ test('invalid amount is rejected locally and a comma amount is sent correctly', 
   const posted = ui.calls.find(c => c.options.method === 'POST');
   assert.equal(JSON.parse(posted.options.body).totalAmount, 25.5);
   assert.equal(ui.get('result-title').textContent, 'Pedido creado');
+});
+
+test('refresh returns to the first page when the collection shrinks', async () => {
+  let shrunk = false;
+  const ui = await screen({pageReply: (path, original) => shrunk
+    ? {items: [], totalPages: 0, totalElements: 0} : original});
+  await ui.get('next').handlers.click();
+  shrunk = true;
+  await ui.get('refresh').handlers.click();
+  assert.equal(ui.calls.at(-1).path, '/api/orders/page?page=0&size=20');
+  assert.equal(ui.get('page-status').textContent, 'Página 1 de 1 · 0 pedidos en total');
+  assert.equal(ui.get('previous').disabled, true);
+  assert.equal(ui.get('next').disabled, true);
+});
+
+test('failed navigation preserves the previous page and refresh restores actions', async () => {
+  let unavailable = false;
+  const ui = await screen({pageReply: (path, original) => {
+    if (unavailable) throw new Error('offline');
+    return original;
+  }});
+  unavailable = true;
+  await ui.get('next').handlers.click();
+  assert.equal(ui.get('create').disabled, true);
+  assert.equal(ui.get('next').disabled, true);
+  unavailable = false;
+  await ui.get('refresh').handlers.click();
+  assert.equal(ui.calls.at(-1).path, '/api/orders/page?page=0&size=20');
+  assert.equal(ui.get('create').disabled, false);
+  assert.equal(ui.get('next').disabled, false);
 });
