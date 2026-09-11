@@ -5,8 +5,7 @@ $demoJava = 'java'
 $portableJava = Get-ChildItem '.tools/java21' -Directory -ErrorAction SilentlyContinue |
     Where-Object { Test-Path (Join-Path $_.FullName 'bin/java.exe') } | Select-Object -First 1
 if ($portableJava) { $demoJava = Join-Path $portableJava.FullName 'bin/java.exe' }
-$demoJar = '.local/pg-wsl-validation/target/spring-backend-rescue-lab-0.0.1-SNAPSHOT.jar'
-if (-not (Test-Path $demoJar)) { $demoJar = 'target/spring-backend-rescue-lab-0.0.1-SNAPSHOT.jar' }
+$demoJar = 'target/spring-backend-rescue-lab-0.0.1-SNAPSHOT.jar'
 if (-not (Test-Path $demoJar)) { throw 'Falta compilar la aplicacion. Consulta docs/local-postgres-recovery.md.' }
 if (Get-NetTCPConnection -LocalPort 8084 -State Listen -ErrorAction SilentlyContinue) {
     throw 'El puerto 8084 ya esta ocupado. No se ha detenido ninguna aplicacion.'
