@@ -57,3 +57,7 @@ There is no destructive down migration. Rollback means restoring a verified back
 ## Remaining work
 
 Complete the blocked packaged-app check on a baseline copy when normal execution is available. Subsequent increments address N+1, order validation and scoped error consistency (see order-reliability.md and observability.md). Authentication/ownership and reconciliation remain outside this demo closure. The adoption paths are validated for the two observed PostgreSQL 17 schemas, not arbitrary customer databases.
+
+## Packaged check follow-up — 2026-09-10
+
+A synthetic baseline fixture was copied through pg_dump into a separate schema of the disposable test database. This is not a recovered historical database. The package compiled, but automatic approval review rejected its isolated startup with 'blocked by policy'. No packaged migration or smoke result is claimed; the check remains pending. The running demo databases were not migrated.

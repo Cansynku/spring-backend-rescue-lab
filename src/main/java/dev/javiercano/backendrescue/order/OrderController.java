@@ -25,4 +25,10 @@ public class OrderController {
 
     @GetMapping
     public List<OrderResponse> list() { return service.list(); }
+
+    @GetMapping("/page")
+    public OrderPage page(@RequestParam(defaultValue = "0") int page,
+                          @RequestParam(defaultValue = "20") int size) {
+        return service.page(page, size);
+    }
 }

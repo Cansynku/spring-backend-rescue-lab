@@ -28,4 +28,13 @@ public class OrderService {
     public List<OrderResponse> list() {
         return orders.findSummaries();
     }
+
+    @Transactional(readOnly = true)
+    public OrderPage page(int page, int size) {
+        if (page < 0 || size < 1 || size > 100 || (long) page * size > Integer.MAX_VALUE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid pagination parameters");
+        }
+        var result = orders.findSummaryPage(org.springframework.data.domain.PageRequest.of(page, size));
+        return new OrderPage(result.getContent(), page, size, result.getTotalElements(), result.getTotalPages());
+    }
 }

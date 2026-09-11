@@ -17,6 +17,16 @@ public interface OrderRepository extends JpaRepository<PurchaseOrderEntity, UUID
             """)
     java.util.List<OrderResponse> findSummaries();
 
+    @Query(value = """
+            select new dev.javiercano.backendrescue.order.OrderResponse(
+                o.id, o.customerEmail, o.totalAmount, o.status, count(p))
+            from PurchaseOrderEntity o left join o.payments p
+            group by o.id, o.customerEmail, o.totalAmount, o.status
+            order by o.id
+            """, countQuery = "select count(o) from PurchaseOrderEntity o")
+    org.springframework.data.domain.Page<OrderResponse> findSummaryPage(
+            org.springframework.data.domain.Pageable pageable);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select o from PurchaseOrderEntity o where o.id = :id")
     Optional<PurchaseOrderEntity> findLockedById(@Param("id") UUID id);
